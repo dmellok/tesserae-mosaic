@@ -1,0 +1,293 @@
+/*
+ * Mosaic look: os7, the classic Macintosh System 7.
+ *
+ * One-bit by nature: ink and paper, the 50% desktop pattern, windows with pinstriped title bars,
+ * a close box and a hard square shadow, a menu bar across the top, dialogs with a double border
+ * and a default button. Chicago and Geneva are not bundled, so Pixelify Sans (bold for titles,
+ * menus and big numerals) and DotGothic16 (text) stand in. The only colour is a single accent mark
+ * for "now", which prints as ink on a one-bit panel like everything else.
+ *
+ * --o7-px is one screen pixel of the old Mac, scaled to the panel: the short edge over 240,
+ * rounded to whole device pixels, so rules, stripes and shadows stay crisp.
+ */
+
+.m[data-look="os7"] {
+  --o7-px: max(1px, round(down, calc(var(--m-u) * 0.42), 1px));
+  --o7-shadow: calc(var(--o7-px) * 2);
+  /* The 50% grey: a one-pixel ink checker. */
+  --o7-grey: repeating-conic-gradient(var(--m-ink) 0 25%, transparent 0 50%) 0 0 / calc(var(--o7-px) * 2) calc(var(--o7-px) * 2);
+  /* Title-bar pinstripes: one line of ink, one of paper. */
+  --o7-stripes: repeating-linear-gradient(to bottom, var(--m-ink) 0 var(--o7-px), transparent var(--o7-px) calc(var(--o7-px) * 2));
+  --o7-bar: max(14px, calc(var(--m-u) * 5.2));
+
+  --m-font-text: "DotGothic16", "Pixelify Sans", monospace;
+  --m-font-display: "Pixelify Sans", "DotGothic16", monospace;
+  --m-font-num: "Pixelify Sans", monospace;
+  --m-font-label: "Pixelify Sans", monospace;
+  --m-w-text: 400;
+  --m-w-display: 700;
+  --m-w-num: 700;
+  --m-w-label: 700;
+  --m-label-case: none;
+  --m-label-track: 0;
+  --m-num-track: 0;
+  --m-rule: var(--o7-px);
+  --m-rule-heavy: calc(var(--o7-px) * 2);
+  --m-radius: 0px;
+  --m-gap: max(6px, calc(var(--m-u) * 2.6));
+  --m-pad: max(6px, calc(var(--m-u) * 3));
+  --m-icons: pixel;
+  --m-icon-weight: bold;
+  --m-accent: var(--m-ink);
+  --m-mute: var(--m-ink);
+  --m-ink-2: var(--m-ink);
+  --m-tint: var(--m-paper);
+
+  /* Blocks are black or white; "coloured" ones are the grey pattern under paper text plates. */
+  --m-b1: var(--m-ink); --m-b1-on: var(--m-paper);
+  --m-b2: var(--m-paper); --m-b2-on: var(--m-ink);
+  --m-b3: var(--m-ink); --m-b3-on: var(--m-paper);
+  --m-bt: var(--m-paper); --m-bt-on: var(--m-ink);
+
+  --m-fs-xs: max(10px, calc(var(--m-u) * 2.8));
+  --m-fs-s: max(11px, calc(var(--m-u) * 3.4));
+  --m-fs-m: max(12px, calc(var(--m-u) * 4.2));
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+/* ---------- the desktop and the menu bar */
+
+.m[data-look="os7"] .m-page {
+  background: var(--o7-grey), var(--m-paper);
+  padding: 0 var(--m-pad) calc(var(--m-pad) + var(--o7-shadow));
+  gap: calc(var(--m-gap) + var(--o7-shadow));
+}
+@container m (max-height: 219px) {
+  .m[data-look="os7"] .m-page { background: var(--m-paper); }
+}
+
+.m[data-look="os7"] .m-masthead {
+  margin: 0 calc(-1 * var(--m-pad));
+  padding: 0 var(--m-pad);
+  min-height: var(--o7-bar);
+  align-items: center;
+  background: var(--m-paper);
+  border-bottom: var(--o7-px) solid var(--m-ink);
+  font-family: var(--m-font-label);
+  font-weight: 700;
+  font-size: var(--m-fs-s);
+  white-space: nowrap;
+  gap: calc(var(--m-gap) * 1.6);
+}
+.m[data-look="os7"] .m-masthead > * { overflow: hidden; text-overflow: ellipsis; min-width: 0; line-height: 1.5; }
+/* The first slot is the menu-bar's first title, after a small apple of a square. */
+.m[data-look="os7"] .m-masthead > :first-child::before {
+  content: "";
+  display: inline-block;
+  width: 0.7em; height: 0.7em;
+  margin-right: 0.6em;
+  background: var(--m-ink);
+  border-radius: 0.2em 0.35em 0.35em 0.35em;
+  vertical-align: -0.02em;
+}
+.m[data-look="os7"] .m-masthead > :nth-child(2):not(:last-child) { text-align: left; flex: 1; }
+/* The last slot is the menu-bar clock, in the same face, set a touch lighter. */
+.m[data-look="os7"] .m-masthead > :last-child:not(:first-child) { font-weight: 400; }
+
+/* ---------- windows: title bar with pinstripes, close box, centred title, hard shadow */
+
+.m[data-look="os7"] .m-window,
+.m[data-look="os7"] .m-hero,
+.m[data-look="os7"] .m-page > .m-row,
+.m[data-look="os7"] .m-page > .m-stats,
+.m[data-look="os7"] .m-page > .m-list,
+.m[data-look="os7"] .m-page > .m-dots,
+.m[data-look="os7"] .m-page > .m-meter {
+  background-color: var(--m-paper);
+  border: var(--o7-px) solid var(--m-ink);
+  box-shadow: var(--o7-shadow) var(--o7-shadow) 0 0 var(--m-ink);
+}
+
+/* A titled window: the pinstripes are a background layer across the top (inset a few pixels, as
+   System 7 drew them), the title a paper plate centred on them, the close box a square at the left. */
+.m[data-look="os7"] .m-window[data-cap],
+.m[data-look="os7"] .m-quote[data-cap] {
+  position: relative;
+  padding-top: calc(var(--o7-bar) + var(--m-pad) * 0.6);
+  background:
+    linear-gradient(var(--m-ink), var(--m-ink)) 0 calc(var(--o7-bar) - var(--o7-px)) / 100% var(--o7-px) no-repeat,
+    var(--o7-stripes) calc(var(--o7-px) * 3) calc(var(--o7-px) * 3) / calc(100% - var(--o7-px) * 6) calc(var(--o7-bar) - var(--o7-px) * 7) no-repeat,
+    var(--m-paper);
+}
+.m[data-look="os7"] .m-window[data-cap]::before,
+.m[data-look="os7"] .m-quote[data-cap]::before {
+  content: attr(data-cap);
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: calc(var(--o7-bar) - var(--o7-px));
+  max-width: calc(100% - var(--o7-bar) * 2.4);
+  box-sizing: border-box;
+  padding: 0 calc(var(--o7-px) * 5);
+  background: var(--m-paper);
+  display: flex; align-items: center;
+  font-family: var(--m-font-label);
+  font-weight: 700;
+  font-size: max(10px, calc(var(--o7-bar) * 0.62));
+  line-height: 1;
+  color: var(--m-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.m[data-look="os7"] .m-window[data-cap]::after,
+.m[data-look="os7"] .m-quote[data-cap]::after {
+  content: "";
+  position: absolute;
+  top: calc((var(--o7-bar) - var(--o7-px) - var(--o7-bar) * 0.56) / 2);
+  left: calc(var(--o7-px) * 6);
+  width: calc(var(--o7-bar) * 0.56);
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  background: var(--m-paper);
+  border: var(--o7-px) solid var(--m-ink);
+  box-shadow: 0 0 0 var(--o7-px) var(--m-paper);
+}
+
+/* ---------- the one big thing */
+
+.m[data-look="os7"] .m-hero { padding: var(--m-pad); }
+.m[data-look="os7"] .m-hero > [data-fit] { justify-content: center; text-align: center; }
+.m[data-look="os7"] .m-clock__period { font-size: max(9px, 0.22em); margin-left: 0.3em; font-family: var(--m-font-text); font-weight: 400; position: relative; top: calc(var(--m-fit-shift, 0px) - 1.3em); }
+.m[data-look="os7"] .m-stat__value .m-clock__period { top: -0.9em; font-size: 0.45em; }
+
+/* ---------- rows of things: a window whose parts are Get Info fields */
+
+.m[data-look="os7"] .m-page > .m-row { padding: var(--m-pad); }
+.m[data-look="os7"] .m-stats { gap: var(--m-gap); }
+.m[data-look="os7"] .m-page > .m-stats { padding: var(--m-pad); }
+.m[data-look="os7"] .m-stat { gap: calc(var(--m-u) * 0.8); }
+.m[data-look="os7"] .m-stat__label { font-size: var(--m-fs-xs); font-weight: 700; text-transform: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m[data-look="os7"] .m-stat__label::after { content: ":"; }
+.m[data-look="os7"] .m-stat--hero .m-stat__label::after { content: none; }
+.m[data-look="os7"] .m-stats .m-stat__value {
+  border: var(--o7-px) solid var(--m-ink);
+  padding: calc(var(--o7-px) * 2) calc(var(--o7-px) * 4);
+  font-size: var(--m-fs-l);
+  white-space: nowrap;
+  overflow: hidden;
+  line-height: 1.1;
+}
+.m[data-look="os7"] .m-stat--hero .m-stat__value { font-size: var(--m-fs-xl); line-height: 1; }
+
+/* ---------- icons: pixel art in a well */
+
+.m[data-look="os7"] .m-iconbox { min-width: 1.4em; min-height: 1.4em; }
+.m[data-look="os7"] .m-iconbox svg { shape-rendering: crispEdges; }
+
+/* ---------- charts */
+
+.m[data-look="os7"] .m-bars { gap: calc(var(--o7-px) * 3); }
+.m[data-look="os7"] .m-bars__bar { background: var(--o7-grey), var(--m-paper); border: var(--o7-px) solid var(--m-ink); }
+.m[data-look="os7"] .m-bars__col--now .m-bars__bar { background: var(--m-ink); }
+.m[data-look="os7"] .m-bars__val { font-family: var(--m-font-num); font-weight: 700; font-size: max(10px, calc(var(--m-u) * 3)); }
+.m[data-look="os7"] .m-bars__tick { font-family: var(--m-font-text); color: var(--m-ink); font-size: max(9px, calc(var(--m-u) * 2.4)); }
+.m[data-look="os7"] .m-bars__col--now .m-bars__tick { background: var(--m-ink); color: var(--m-paper); padding: 0 0.3em; }
+@container m (max-width: 599px) {
+  .m[data-look="os7"] .m-bars__col:nth-child(even) .m-bars__tick { visibility: hidden; }
+}
+
+.m[data-look="os7"] .m-spark__line { stroke: var(--m-ink); }
+.m[data-look="os7"] .m-spark__now { border-radius: 0; background: var(--m-ink); }
+
+/* The progress bar: a framed track, filled with ink. */
+.m[data-look="os7"] .m-meter {
+  height: max(10px, calc(var(--m-u) * 3));
+  border: var(--o7-px) solid var(--m-ink);
+  background: var(--m-paper);
+  box-shadow: none;
+}
+.m[data-look="os7"] .m-page > .m-meter { box-shadow: var(--o7-shadow) var(--o7-shadow) 0 0 var(--m-ink); flex: none; }
+.m[data-look="os7"] .m-meter::before { background: var(--o7-grey), var(--m-paper); inset: var(--o7-px); border-right: var(--o7-px) solid var(--m-ink); }
+
+/* Days: small squares, past ones grey, today inverted, the rest outlined. */
+.m[data-look="os7"] .m-page > .m-dots { padding: var(--m-pad); }
+.m[data-look="os7"] .m-dots__dot { border-radius: 0; border-width: var(--o7-px); }
+.m[data-look="os7"] .m-dots__dot--done { background: var(--o7-grey), var(--m-paper); }
+.m[data-look="os7"] .m-dots__dot--now { background: var(--m-ink); border-color: var(--m-ink); }
+
+/* ---------- a list: a pull-down menu, its first item selected */
+
+.m[data-look="os7"] .m-list { padding: calc(var(--o7-px) * 3) 0; }
+.m[data-look="os7"] .m-list__item {
+  border-bottom: 0;
+  padding: calc(var(--m-u) * 1.1) calc(var(--m-u) * 2.4);
+  font-family: var(--m-font-text);
+  gap: calc(var(--m-u) * 2.4);
+}
+.m[data-look="os7"] .m-list__item + .m-list__item { border-top: var(--o7-px) dotted var(--m-ink); }
+.m[data-look="os7"] .m-list__item:first-child { background: var(--m-ink); color: var(--m-paper); }
+.m[data-look="os7"] .m-list__n { font-family: var(--m-font-num); font-weight: 700; min-width: 1.4em; }
+.m[data-look="os7"] .m-list__t { -webkit-line-clamp: 1; }
+@container m (min-height: 600px) {
+  .m[data-look="os7"] .m-list__t { -webkit-line-clamp: 2; }
+}
+
+/* ---------- a quote: an alert dialog with a default button */
+
+.m[data-look="os7"] .m-quote {
+  background: var(--m-paper);
+  border: calc(var(--o7-px) * 3) double var(--m-ink);
+  outline: var(--o7-px) solid var(--m-ink);
+  outline-offset: calc(var(--o7-px) * 2);
+  box-shadow: 0 0 0 calc(var(--o7-px) * 3) var(--m-paper), calc(var(--o7-px) * 3 + var(--o7-shadow)) calc(var(--o7-px) * 3 + var(--o7-shadow)) 0 calc(var(--o7-px) * 3) var(--m-ink);
+  margin: calc(var(--o7-px) * 3);
+  padding: var(--m-pad);
+}
+.m[data-look="os7"] .m-quote[data-cap] { padding-top: calc(var(--o7-bar) + var(--m-pad) * 0.6); }
+.m[data-look="os7"] .m-quote__text { font-family: var(--m-font-display); font-weight: 700; line-height: 1.25; text-align: left; }
+/* The byline is the default button: a rounded rectangle with a heavy outline. */
+.m[data-look="os7"] .m-quote__by {
+  align-self: flex-end;
+  font-family: var(--m-font-label);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--m-fs-s);
+  padding: calc(var(--m-u) * 1) calc(var(--m-u) * 4);
+  border: var(--o7-px) solid var(--m-ink);
+  border-radius: 0.8em;
+  box-shadow: 0 0 0 calc(var(--o7-px) * 2) var(--m-paper), 0 0 0 calc(var(--o7-px) * 4) var(--m-ink);
+  margin: calc(var(--o7-px) * 4);
+  max-width: calc(100% - var(--o7-px) * 8);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ---------- empty: an alert line */
+
+.m[data-look="os7"] .m-empty {
+  font-family: var(--m-font-text);
+  color: var(--m-ink);
+  background: var(--m-paper);
+  border: var(--o7-px) solid var(--m-ink);
+  box-shadow: var(--o7-shadow) var(--o7-shadow) 0 0 var(--m-ink);
+  gap: 0.6em;
+}
+.m[data-look="os7"] .m-empty::before {
+  content: "!";
+  display: inline-grid; place-items: center;
+  width: 1.6em; height: 1.6em;
+  border: var(--o7-px) solid var(--m-ink);
+  font-family: var(--m-font-label); font-weight: 700;
+  flex: none;
+}
+.m[data-look="os7"] .m-window .m-empty { border: 0; box-shadow: none; }
+
+/* ---------- small panels: no desktop pattern, thinner chrome */
+
+@container m (max-height: 219px) {
+  .m[data-look="os7"] { --o7-shadow: var(--o7-px); --o7-bar: 12px; }
+  .m[data-look="os7"] .m-masthead { min-height: 14px; font-size: 10px; }
+}

@@ -3,7 +3,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 const { version } = JSON.parse(readFileSync("package.json", "utf8"));
 const banner = `/*! Mosaic ${version} | MIT | https://github.com/dmellok/tesserae-mosaic */\n`;
-const LOOKS = ["bauhaus", "almanac", "signal", "pixel"];
+const LOOKS = ["bauhaus", "almanac", "signal", "pixel", "os7"];
 mkdirSync("dist", { recursive: true });
 const css = [readFileSync("src/core.css", "utf8"), ...LOOKS.map((l) => readFileSync(`src/looks/${l}.css`, "utf8"))].join("\n");
 writeFileSync("dist/mosaic.css", banner + css);

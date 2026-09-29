@@ -13,7 +13,7 @@ import puppeteer from "puppeteer-core";
 
 const args = process.argv.slice(2);
 const opt = (f) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : null; };
-const LOOKS = ["bauhaus", "almanac", "signal", "pixel"];
+const LOOKS = ["bauhaus", "almanac", "signal", "pixel", "os7"];
 const looks = args.filter((a) => LOOKS.includes(a));
 const SPECS = ["today", "weather_board", "year_progress", "countdown", "headlines", "quote"];
 const specs = opt("--spec") ? [opt("--spec")] : SPECS;

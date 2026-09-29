@@ -1,7 +1,7 @@
 # Mosaic
 
 An open design system for e-ink dashboards and widgets. Write a dashboard once from Mosaic
-components, and one attribute gives it one of four complete looks. It reads at every panel size
+components, and one attribute gives it one of five complete looks. It reads at every panel size
 from 296×128 to 1600×1200, and prints cleanly on one-bit panels as well as colour ones.
 
 Mosaic is used by [Tesserae](https://github.com/dmellok/tesserae) and Tesserae Cloud, and it is
@@ -36,6 +36,7 @@ In a Tesserae code page, add `"mosaic"` to the page's `libs` and both files are 
 | `almanac` | A printed page: serif numerals, a masthead between rules, one red accent. |
 | `signal` | Swiss minimal on a twelve-column grid, designed for one-bit panels first. |
 | `pixel` | Pixel type, pixel-art icons and dithered windows, like an old handheld game. |
+| `os7` | The classic Macintosh System 7: pinstriped windows, a menu bar, dialogs, the grey desktop. |
 
 A look styles components, never a particular dashboard, so it applies to anything built from them.
 
