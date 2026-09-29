@@ -20,5 +20,8 @@ const meta = { version, looks: Object.fromEntries(LOOKS.map((l) => {
   return [l, { icons: pixel ? [] : [w] }];
 })) };
 writeFileSync("dist/mosaic.json", JSON.stringify(meta, null, 2));
+// The specimens as data, so a host can ship them as starting points (Tesserae Cloud's starters).
+const { SPECIMENS } = await import("../reference/specimens.js");
+writeFileSync("dist/specimens.json", JSON.stringify(SPECIMENS, null, 1));
 writeFileSync("dist/mosaic.js", banner + readFileSync("src/mosaic.js", "utf8").replace('version: "0.1.0"', `version: "${version}"`));
 console.log(`dist/mosaic.css ${Math.round(css.length / 1024)} KB, dist/mosaic.js`);
