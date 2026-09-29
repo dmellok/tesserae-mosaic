@@ -1,0 +1,254 @@
+/*
+ * Mosaic core: the parts of the design system that do not change between looks.
+ *
+ * A dashboard or widget opts in by wrapping itself in .m and choosing a look:
+ *
+ *   <main class="m" data-look="signal"><div class="m-page"> ... </div></main>
+ *
+ * Everything inside is sized from the short edge of the nearest .m (it is a size container, and
+ * --m-u is one hundredth of its short edge), so the same markup reads at 296 by 128 and at 1600
+ * by 1200. Colour comes from roles that read the host's theme when it has one (Tesserae Cloud's
+ * --ink and --accent-1, the self-hosted --text-primary and --accent-1) and fall back to a plain
+ * paper palette when it does not. A look (looks/*.css) sets the rest: typefaces, weights, rule
+ * weights, what a block and a window look like.
+ *
+ * One-bit panels: mosaic.js compares the red role with the ink role and, when a theme prints them
+ * the same (Tesserae's mono theme), marks the root data-bits="1". The rules below then keep text
+ * on light blocks readable and drop tints that would dither into grey.
+ */
+
+.m {
+  container: m / size;
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  /* Size: one unit is one hundredth of the short edge. Used inside .m, never on it. */
+  --m-u: 1cqmin;
+
+  /* Colour roles. */
+  --m-paper: var(--surface, var(--bg, #ffffff));
+  --m-ink: var(--ink, var(--text-primary, #141412));
+  --m-ink-2: var(--text-secondary, var(--m-ink));
+  --m-mute: var(--muted, var(--text-muted, #5b5a55));
+  --m-tint: var(--surface-sunken, #eeede8);
+  --m-red: var(--accent-1, #c8462c);
+  --m-yellow: var(--accent-2, #d9a21b);
+  --m-green: var(--accent-3, #4f7a3a);
+  --m-blue: var(--accent-5, #3c4e8a);
+  --m-on: var(--on-accent, #ffffff);
+
+  /* Look tokens, with plain defaults. A look overrides these on .m[data-look="..."]. */
+  --m-accent: var(--m-red);
+  --m-font-text: var(--font-sans, "Inter", "Helvetica Neue", Arial, sans-serif);
+  --m-font-display: var(--m-font-text);
+  --m-font-num: var(--m-font-display);
+  --m-font-label: var(--m-font-text);
+  --m-w-text: 500;
+  --m-w-display: 800;
+  --m-w-num: 800;
+  --m-w-label: 700;
+  --m-label-case: uppercase;
+  --m-label-track: 0.08em;
+  --m-num-track: -0.02em;
+  --m-rule: max(1px, calc(var(--m-u) * 0.35));
+  --m-rule-heavy: max(2px, calc(var(--m-u) * 1));
+  --m-radius: 0px;
+  --m-gap: calc(var(--m-u) * 2.4);
+  --m-pad: calc(var(--m-u) * 4);
+  --m-icons: phosphor;
+
+  /* Blocks: the fill and the text on it, per kind. */
+  --m-b1: var(--m-red);
+  --m-b1-on: var(--m-on);
+  --m-b2: var(--m-yellow);
+  --m-b2-on: var(--m-ink);
+  --m-b3: var(--m-blue);
+  --m-b3-on: var(--m-on);
+  --m-bt: var(--m-tint);
+  --m-bt-on: var(--m-ink);
+  --m-bi: var(--m-ink);
+  --m-bi-on: var(--m-paper);
+
+  /* Type scale, in units. Every size has a floor so small panels stay legible. */
+  --m-fs-xs: max(9px, calc(var(--m-u) * 2.4));
+  --m-fs-s: max(10px, calc(var(--m-u) * 3));
+  --m-fs-m: max(11px, calc(var(--m-u) * 4));
+  --m-fs-l: max(12px, calc(var(--m-u) * 6));
+  --m-fs-xl: max(14px, calc(var(--m-u) * 9));
+  --m-fs-xxl: max(18px, calc(var(--m-u) * 14));
+
+  background: var(--m-paper);
+  color: var(--m-ink);
+  font-family: var(--m-font-text);
+  font-weight: var(--m-w-text);
+  line-height: 1.25;
+}
+.m *, .m *::before, .m *::after { box-sizing: border-box; }
+
+/* On a one-bit panel every accent is ink: text on a light block turns to the "on" colour, and
+   tints (which would dither into a grey texture) become paper. */
+.m[data-bits="1"] {
+  --m-b2-on: var(--m-on);
+  --m-tint: var(--m-paper);
+  --m-mute: var(--m-ink);
+  --m-ink-2: var(--m-ink);
+}
+
+/* ---------- layout */
+
+.m-page { height: 100%; display: flex; flex-direction: column; gap: var(--m-gap); padding: var(--m-pad); font-size: var(--m-fs-m); min-height: 0; }
+.m-page--flush { padding: 0; gap: 0; }
+.m-stack { display: flex; flex-direction: column; gap: var(--m-gap); min-height: 0; min-width: 0; }
+.m-row { display: flex; flex-direction: row; gap: var(--m-gap); align-items: stretch; min-width: 0; }
+.m-row--baseline { align-items: baseline; }
+.m-row--center { align-items: center; }
+.m-fill { flex: 1 1 0; min-width: 0; min-height: 0; }
+.m-end { margin-left: auto; }
+.m-tight { gap: calc(var(--m-gap) * 0.4); }
+.m-flush { gap: 0; }
+
+/* Two halves side by side, stacked when the panel is taller than wide. */
+.m-split { display: flex; gap: var(--m-gap); min-height: 0; min-width: 0; }
+.m-split > * { flex: 1 1 0; min-width: 0; min-height: 0; }
+@container m (orientation: portrait) {
+  .m-split { flex-direction: column; }
+}
+
+/* Twelve columns. */
+.m-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--m-gap); min-height: 0; }
+.m-span-2 { grid-column: span 2; } .m-span-3 { grid-column: span 3; } .m-span-4 { grid-column: span 4; }
+.m-span-6 { grid-column: span 6; } .m-span-8 { grid-column: span 8; } .m-span-9 { grid-column: span 9; }
+.m-span-12 { grid-column: span 12; }
+@container m (orientation: portrait) {
+  .m-grid > [class*="m-span-"]:not(.m-span-keep) { grid-column: span 12; }
+}
+
+/* Showing and hiding by panel size: small is a short edge under 360 px, tiny under 220 px. */
+@container m (max-width: 359px) { .m-hide-small { display: none !important; } }
+@container m (max-height: 359px) { .m-hide-small { display: none !important; } }
+@container m (max-width: 219px) { .m-hide-tiny { display: none !important; } }
+@container m (max-height: 219px) { .m-hide-tiny { display: none !important; } }
+@container m (orientation: portrait) { .m-hide-portrait { display: none !important; } }
+@container m (orientation: landscape) { .m-hide-landscape { display: none !important; } }
+
+/* ---------- text */
+
+.m-label {
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--m-fs-xs);
+  text-transform: var(--m-label-case);
+  letter-spacing: var(--m-label-track);
+  line-height: 1.2;
+}
+.m-mute { color: var(--m-mute); }
+.m-display { font-family: var(--m-font-display); font-weight: var(--m-w-display); line-height: 1.05; }
+.m-num {
+  font-family: var(--m-font-num);
+  font-weight: var(--m-w-num);
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: var(--m-num-track);
+  line-height: 1;
+}
+.m-xs { font-size: var(--m-fs-xs); } .m-s { font-size: var(--m-fs-s); } .m-m { font-size: var(--m-fs-m); }
+.m-l { font-size: var(--m-fs-l); } .m-xl { font-size: var(--m-fs-xl); } .m-xxl { font-size: var(--m-fs-xxl); }
+.m-accent { color: var(--m-accent); }
+
+/* A box whose text mosaic.js grows to fill it (data-fit). It needs a size of its own. */
+[data-fit] { overflow: hidden; white-space: nowrap; line-height: 1.1; min-width: 0; min-height: 0; }
+[data-fit="wrap"] { white-space: normal; }
+
+/* ---------- rules */
+
+.m-rule { border: 0; border-top: var(--m-rule) solid var(--m-ink); margin: 0; flex: none; }
+.m-rule--heavy { border-top-width: var(--m-rule-heavy); }
+.m-rule--double { border-top: var(--m-rule) solid var(--m-ink); border-bottom: var(--m-rule) solid var(--m-ink); height: calc(var(--m-rule) * 4); }
+.m-rule--v { border-top: 0; border-left: var(--m-rule) solid var(--m-ink); align-self: stretch; }
+
+/* ---------- surfaces */
+
+.m-block { background: var(--m-bt); color: var(--m-bt-on); padding: calc(var(--m-u) * 3); border-radius: var(--m-radius); min-width: 0; min-height: 0; }
+.m-block--1 { background: var(--m-b1); color: var(--m-b1-on); }
+.m-block--2 { background: var(--m-b2); color: var(--m-b2-on); }
+.m-block--3 { background: var(--m-b3); color: var(--m-b3-on); }
+.m-block--ink { background: var(--m-bi); color: var(--m-bi-on); }
+.m-block--paper { background: var(--m-paper); color: var(--m-ink); }
+
+/* A titled box. The look decides whether it is a card, a ruled section or a double-bordered window. */
+.m-window { position: relative; padding: calc(var(--m-u) * 3); min-width: 0; min-height: 0; }
+.m-window__cap { font-family: var(--m-font-label); font-weight: var(--m-w-label); font-size: var(--m-fs-xs); text-transform: var(--m-label-case); letter-spacing: var(--m-label-track); }
+
+/* A newspaper-style header: left, centre and right slots. */
+.m-masthead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--m-gap); flex: none; }
+.m-masthead > :nth-child(2) { text-align: center; flex: 1; min-width: 0; }
+
+/* The one big thing on a page (a clock, a count, a temperature): it takes the room it is given and
+   centres what is in it; put data-fit on the text inside to grow it to fill. */
+.m-hero { display: flex; align-items: center; min-height: 0; min-width: 0; flex: 1 1 0; }
+.m-hero > [data-fit] { flex: 1; height: 100%; display: flex; align-items: center; }
+
+/* An icon in a square of its own, sized by the box it sits in. */
+.m-iconbox { display: grid; place-items: center; aspect-ratio: 1; flex: none; font-size: calc(var(--m-u) * 9); min-width: 0; }
+.m-iconbox .m-icon { font-size: 0.8em; }
+
+/* ---------- data */
+
+/* One figure with its name: <div class="m-stat"><span class="m-stat__label">High</span><b class="m-stat__value">17°</b></div> */
+.m-stat { display: flex; flex-direction: column; gap: calc(var(--m-u) * 0.8); min-width: 0; }
+.m-stat__label { font-family: var(--m-font-label); font-weight: var(--m-w-label); font-size: var(--m-fs-xs); text-transform: var(--m-label-case); letter-spacing: var(--m-label-track); }
+.m-stat__value { font-family: var(--m-font-num); font-weight: var(--m-w-num); font-variant-numeric: tabular-nums; letter-spacing: var(--m-num-track); font-size: var(--m-fs-l); line-height: 1; }
+.m-stat__sub { font-size: var(--m-fs-xs); color: var(--m-mute); }
+.m-stat--hero .m-stat__value { font-size: var(--m-fs-xl); }
+/* A row of stats sharing the width. */
+.m-stats { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--m-gap); }
+@container m (orientation: portrait) { .m-stats--wrap { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* A time, filled in by Mosaic.clock: the numerals and a small am/pm. */
+.m-clock { display: flex; align-items: baseline; font-family: var(--m-font-num); font-weight: var(--m-w-num); font-variant-numeric: tabular-nums; letter-spacing: var(--m-num-track); line-height: 1; white-space: nowrap; }
+.m-clock__period { font-size: 0.24em; font-family: var(--m-font-label); font-weight: var(--m-w-label); letter-spacing: 0.04em; margin-left: 0.12em; text-transform: var(--m-label-case); }
+
+/* Bars, drawn by Mosaic.bars: one column each, the value above, a tick below. */
+.m-bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: calc(var(--m-u) * 0.8); align-items: end; min-height: 0; height: 100%; }
+.m-bars__col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; gap: calc(var(--m-u) * 0.6); }
+.m-bars__bar { width: 100%; background: var(--m-ink); height: calc(var(--v) * 100%); min-height: 2px; }
+.m-bars__val { font-family: var(--m-font-num); font-weight: var(--m-w-num); font-size: var(--m-fs-xs); font-variant-numeric: tabular-nums; }
+.m-bars__tick { font-family: var(--m-font-label); font-size: var(--m-fs-xs); color: var(--m-mute); white-space: nowrap; }
+.m-bars__col--now .m-bars__bar { background: var(--m-accent); }
+.m-bars__plot { flex: 1; width: 100%; display: flex; align-items: flex-end; min-height: 0; }
+
+/* A line, drawn by Mosaic.spark as an SVG that fills the box. */
+.m-spark { position: relative; min-height: 0; }
+.m-spark svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.m-spark__line { fill: none; stroke: var(--m-ink); stroke-width: max(1.5px, calc(var(--m-u) * 0.4)); vector-effect: non-scaling-stroke; }
+.m-spark__now { fill: var(--m-accent); }
+
+/* How far through something: set --m-value (0 to 1) on the element. */
+.m-meter { position: relative; height: max(6px, calc(var(--m-u) * 2)); border: var(--m-rule) solid var(--m-ink); }
+.m-meter::before { content: ""; position: absolute; inset: 0; right: auto; width: calc(var(--m-value, 0) * 100%); background: var(--m-ink); }
+
+/* A grid of days or steps, drawn by Mosaic.dots to fill its box. */
+.m-dots { display: grid; align-content: center; justify-content: center; min-height: 0; }
+.m-dots__dot { aspect-ratio: 1; border: max(1px, calc(var(--m-u) * 0.25)) solid var(--m-ink); border-radius: 50%; }
+.m-dots__dot--done { background: var(--m-ink); }
+.m-dots__dot--now { background: var(--m-accent); border-color: var(--m-accent); }
+
+/* Numbered rows, filled by Mosaic.list, which drops rows that would not fit whole. */
+.m-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.m-list__item { display: flex; gap: calc(var(--m-u) * 2); align-items: baseline; padding: calc(var(--m-u) * 1.2) 0; border-bottom: var(--m-rule) solid var(--m-ink); min-width: 0; }
+.m-list__n { flex: none; min-width: 1.6em; font-family: var(--m-font-num); font-weight: var(--m-w-num); font-variant-numeric: tabular-nums; }
+.m-list__t { min-width: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* A line and who said it. */
+.m-quote { margin: 0; display: flex; flex-direction: column; gap: var(--m-gap); min-height: 0; }
+.m-quote__text { flex: 1; min-height: 0; font-family: var(--m-font-display); font-weight: var(--m-w-display); line-height: 1.2; }
+.m-quote__by { font-family: var(--m-font-label); font-weight: var(--m-w-label); font-size: var(--m-fs-s); text-transform: var(--m-label-case); letter-spacing: var(--m-label-track); }
+
+/* What to show when there is nothing to show yet. */
+.m-empty { display: flex; align-items: center; justify-content: center; text-align: center; color: var(--m-mute); font-size: var(--m-fs-s); padding: var(--m-gap); min-height: 0; }
+
+/* An icon: a Phosphor glyph, or in a look that draws its own, an inline SVG from Mosaic.icon. */
+.m-icon { display: inline-grid; place-items: center; line-height: 1; }
+.m-icon svg { width: 1em; height: 1em; display: block; shape-rendering: crispEdges; }

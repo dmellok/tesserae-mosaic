@@ -1,0 +1,17 @@
+{
+  "name": "@tesserae/mosaic",
+  "version": "0.1.0",
+  "description": "An open design system for e-ink dashboards and widgets: tokens, four looks, components and a small script.",
+  "license": "MIT",
+  "author": "Kayden D'Mello",
+  "files": ["dist", "src", "README.md", "LICENSE"],
+  "style": "dist/mosaic.css",
+  "main": "dist/mosaic.js",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "proof": "node scripts/proof.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}
