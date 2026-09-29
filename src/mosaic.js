@@ -33,15 +33,54 @@
     const h = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
     if (w <= 0 || h <= 0) return 0;
     const min = o.min != null ? o.min : 10;
-    const max = o.max != null ? o.max : Math.max(min, h * 1.4);
+    const wrap = el.dataset.fit === "wrap" || o.wrap;
+    return wrap ? fitLines(el, w, h, min, o.max) : fitInk(el, w, h, min, o.max);
+  };
+
+  /**
+   * Text that wraps: the largest size at which its lines fit the box. Measured by scroll size,
+   * which is what wrapping and clipping obey.
+   */
+  function fitLines(el, w, h, min, maxOpt) {
+    const max = maxOpt != null ? maxOpt : Math.max(min, h * 1.4);
+    const fits = () => el.scrollWidth <= el.clientWidth + 1 && el.scrollHeight <= el.clientHeight + 1;
+    return search(el, min, max, fits);
+  }
+
+  /**
+   * One line of text, sized by its ink. A font's line box can be twice the height of its
+   * numerals (Jost's is about 1.45em against 0.72em digits), so sizing by the line box leaves a
+   * number at half its room. This measures the glyphs' own extent with canvas text metrics, sets
+   * the line box to exactly the box, and nudges the text so the ink sits centred in it.
+   */
+  function fitInk(el, w, h, min, maxOpt) {
+    // Bare text is wrapped so it can be nudged; a clock's spans are nudged as they are.
+    if ([...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) el.innerHTML = '<span class="m-fit">' + el.innerHTML + "</span>";
+    const main = el.querySelector(".m-clock__time") || el.firstElementChild || el;
+    const k = inkOf(main);
+    const max = maxOpt != null ? maxOpt : Math.max(min, h / Math.max(0.2, k.a + k.d));
+    el.style.lineHeight = h + "px";
     const range = document.createRange();
     range.selectNodeContents(el);
-    // Fits when the text stays inside the box both ways: the glyphs (the Range) within the content
-    // width, and the lines (scroll size) within the box, which is what clipping and wrapping obey.
-    const fits = () => {
-      const b = range.getBoundingClientRect();
-      return b.width <= w + 0.5 && el.scrollWidth <= el.clientWidth + 1 && el.scrollHeight <= el.clientHeight + 1;
-    };
+    const fits = () => range.getBoundingClientRect().width <= w + 0.5 && el.scrollWidth <= el.clientWidth + 1;
+    const size = search(el, min, max, fits);
+    // Where the baseline is with this line box, against where it would centre the ink.
+    el.style.setProperty("--m-fit-shift", (size * ((k.a - k.d) - (k.A - k.D)) / 2).toFixed(2) + "px");
+    return size;
+  }
+
+  /** Ink and font extents of an element's text, per 1px of font size. */
+  function inkOf(el) {
+    const cs = getComputedStyle(el);
+    const c = (M._canvas = M._canvas || document.createElement("canvas").getContext("2d"));
+    c.font = cs.fontStyle + " " + cs.fontWeight + " 100px " + cs.fontFamily;
+    const m = c.measureText(el.textContent || "0");
+    const A = m.fontBoundingBoxAscent || m.actualBoundingBoxAscent, D = m.fontBoundingBoxDescent || m.actualBoundingBoxDescent;
+    return { a: m.actualBoundingBoxAscent / 100, d: m.actualBoundingBoxDescent / 100, A: A / 100, D: D / 100 };
+  }
+
+  /** The largest font size in [min, max] at which fits() holds, set on el and returned. */
+  function search(el, min, max, fits) {
     let lo = min, hi = max;
     el.style.fontSize = hi + "px";
     if (fits()) return hi;
@@ -50,9 +89,10 @@
       el.style.fontSize = mid + "px";
       if (fits()) lo = mid; else hi = mid;
     }
-    el.style.fontSize = Math.floor(lo * 10) / 10 + "px";
-    return lo;
-  };
+    const size = Math.floor(lo * 10) / 10;
+    el.style.fontSize = size + "px";
+    return size;
+  }
   /** Fit every [data-fit] inside root. data-fit-min / data-fit-max bound the size. */
   M.fitAll = function fitAll(root) {
     for (const el of (root || document).querySelectorAll("[data-fit]")) {
@@ -81,6 +121,17 @@
    * the real glyphs), mark one-bit roots, then fit [data-fit] and trim lists.
    */
   M.ready = async function ready(root) {
+    // A face only starts loading once something is set in it, so text drawn after this (a list
+    // filled later) would be measured in the fallback. Ask for every face the look names first.
+    const faces = new Set();
+    for (const r of roots(root)) {
+      const cs = getComputedStyle(r);
+      for (const k of ["text", "display", "num", "label"]) {
+        const fam = cs.getPropertyValue("--m-font-" + k).trim(), w = cs.getPropertyValue("--m-w-" + k).trim() || "400";
+        if (fam) faces.add(w + " 16px " + fam);
+      }
+    }
+    if (document.fonts && document.fonts.load) await Promise.all([...faces].map((f) => document.fonts.load(f).catch(() => undefined)));
     if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) { /* draw anyway */ } }
     for (const r of roots(root)) {
       r.dataset.bits = String(M.bits(r));
@@ -106,7 +157,10 @@
   /** Fill a .m-clock with the time and its period, then fit it if it asks to be fitted. */
   M.clock = function clock(el, opts) {
     const t = M.timeParts(fmt(opts).date, opts);
-    el.innerHTML = '<span class="m-clock__time">' + esc(t.time) + "</span>" + (t.period ? '<span class="m-clock__period">' + esc(t.period) + "</span>" : "");
+    // Hour, separator and minutes in their own spans, so a look can stack them (hour over minutes).
+    const hm = /^(\d{1,2})(\D+)(\d{2})$/.exec(t.time);
+    const time = hm ? '<span class="m-clock__h">' + esc(hm[1]) + '</span><span class="m-clock__sep">' + esc(hm[2]) + '</span><span class="m-clock__m">' + esc(hm[3]) + "</span>" : esc(t.time);
+    el.innerHTML = '<span class="m-clock__time">' + time + "</span>" + (t.period ? '<span class="m-clock__period">' + esc(t.period) + "</span>" : "");
     return t;
   };
   /**
@@ -143,7 +197,7 @@
     el.classList.add("m-bars");
     el.innerHTML = items.map((it, i) => {
       const v = floor + (1 - floor) * ((+it.value - lo) / span);
-      return '<div class="m-bars__col' + (i === o.now ? " m-bars__col--now" : "") + '">' +
+      return '<div class="m-bars__col' + (i === o.now ? " m-bars__col--now" : "") + '" style="--v:' + v.toFixed(3) + '">' +
         (it.label != null ? '<span class="m-bars__val">' + esc(it.label) + "</span>" : "") +
         '<div class="m-bars__plot"><div class="m-bars__bar" style="--v:' + v.toFixed(3) + '"></div></div>' +
         (it.tick != null ? '<span class="m-bars__tick">' + esc(it.tick) + "</span>" : "") + "</div>";
@@ -156,9 +210,10 @@
     const w = 100, h = 40, lo = Math.min.apply(null, values), hi = Math.max.apply(null, values), span = Math.max(hi - lo, 1e-9);
     const pts = values.map((v, i) => [values.length > 1 ? (i / (values.length - 1)) * w : w / 2, h - 3 - ((v - lo) / span) * (h - 6)]);
     const d = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(2) + " " + p[1].toFixed(2)).join(" ");
-    const now = o.now != null && pts[o.now] ? '<circle class="m-spark__now" cx="' + pts[o.now][0] + '" cy="' + pts[o.now][1] + '" r="1.8" vector-effect="non-scaling-stroke"/>' : "";
+    // The marker is an element over the stretched line, so it keeps its shape and a look can square it.
+    const now = o.now != null && pts[o.now] ? '<i class="m-spark__now" style="left:' + (pts[o.now][0] / w * 100).toFixed(2) + "%;top:" + (pts[o.now][1] / h * 100).toFixed(2) + '%"></i>' : "";
     el.classList.add("m-spark");
-    el.innerHTML = '<svg viewBox="0 0 ' + w + " " + h + '" preserveAspectRatio="none"><path class="m-spark__line" d="' + d + '"/>' + now + "</svg>";
+    el.innerHTML = '<svg viewBox="0 0 ' + w + " " + h + '" preserveAspectRatio="none"><path class="m-spark__line" d="' + d + '"/></svg>' + now;
   };
 
   /**
@@ -168,7 +223,12 @@
   M.dots = function dots(el, opts) {
     const o = fmt(opts);
     const total = o.total, done = o.done || 0;
-    const W = el.clientWidth, H = el.clientHeight;
+    // The class goes on first, so a look's padding for .m-dots is in place before measuring, and
+    // the grid is fitted to the content box, inside that padding.
+    el.classList.add("m-dots");
+    const cs = getComputedStyle(el);
+    const W = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const H = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
     if (!total || !W || !H) return;
     const gapRatio = o.gap != null ? o.gap : 0.28;
     let best = { cols: 1, size: 0 };
@@ -178,7 +238,6 @@
       if (size > best.size) best = { cols, size };
     }
     const size = Math.max(1, Math.floor(best.size)), gap = Math.max(1, Math.floor(size * gapRatio));
-    el.classList.add("m-dots");
     el.style.gridTemplateColumns = "repeat(" + best.cols + ", " + size + "px)";
     el.style.gap = gap + "px";
     let html = "";
@@ -195,9 +254,13 @@
   };
   /** Drop rows from the end until the rest fit the list's box. */
   M.trim = function trim(el) {
-    const bottom = () => el.getBoundingClientRect().bottom + 0.5;
+    // Against the content box's bottom, so a look that pads or insets the list keeps its inset.
+    const bottom = () => { const cs = getComputedStyle(el); return el.getBoundingClientRect().bottom - parseFloat(cs.paddingBottom) - parseFloat(cs.borderBottomWidth) + 0.5; };
     const rows = [...el.children];
-    while (rows.length > 1 && rows[rows.length - 1].getBoundingClientRect().bottom > bottom()) rows.pop().remove();
+    let dropped = 0;
+    while (rows.length > 1 && rows[rows.length - 1].getBoundingClientRect().bottom > bottom()) { rows.pop().remove(); dropped++; }
+    // How many did not fit, for a look that says "+3 more" (content: attr(data-more)).
+    if (dropped) el.dataset.more = "+" + dropped + " more"; else delete el.dataset.more;
   };
 
   // ---------- icons
@@ -227,6 +290,13 @@
     storm: [".......####.....", "......#....#....", "...###......#...", "..#..........##.", "..#............#", ".#.............#", "#..............#", "#..............#", ".##############.", ".......####.....", ".....#####......", "....######......", "......###.......", "......##........", "......#........."],
     unknown: [".......####.....", "......#....#....", "...###..##..#...", "..#....#..#..##.", "..#......#.....#", ".#......#......#", "#..............#", "#.......#......#", ".##############."],
     arrow: ["#...", "##..", "###.", "####", "###.", "##..", "#..."],
+    calendar: ["..#......#..", "############", "#..........#", "############", "#..........#", "#.##.##.##.#", "#.##.##.##.#", "#..........#", "#.##.##....#", "#.##.##....#", "#..........#", "############"],
+    news: ["##########..", "#........###", "#.######.#.#", "#.######.#.#", "#........#.#", "#.######.#.#", "#........#.#", "#.######.#.#", "#........#.#", "#.######.#.#", "#........#.#", "############"],
+    quote: ["............", ".###...###..", "####..####..", "####..####..", ".###...###..", "..##....##..", ".##....##...", "##....##....", "............"],
+    pin: ["...####...", "..#....#..", ".#..##..#.", ".#.#..#.#.", ".#..##..#.", "..#....#..", "..#....#..", "...#..#...", "...#..#...", "....##...."],
+    clock: ["...######...", "..#......#..", ".#...#....#.", "#....#.....#", "#....#.....#", "#....####..#", "#..........#", "#..........#", ".#........#.", "..#......#..", "...######..."],
+    sunrise: ["......#......", "..#...#...#..", "...#.....#...", ".....###.....", "....#####....", "##.#######.##", ".............", "#############", "..#########..", "....#####...."],
+    sunset: ["....#####....", "..#########..", "#############", "......#......", ".....###.....", "....#####....", "##.#######.##", "...#.....#...", "..#...#...#..", "......#......"],
   };
   M.PIXEL = PIXEL;
   /** A bitmap as crisp inline SVG, one rect per ink cell. */

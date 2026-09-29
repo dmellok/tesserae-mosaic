@@ -160,6 +160,8 @@
 /* A box whose text mosaic.js grows to fill it (data-fit). It needs a size of its own. */
 [data-fit] { overflow: hidden; white-space: nowrap; line-height: 1.1; min-width: 0; min-height: 0; }
 [data-fit="wrap"] { white-space: normal; }
+/* Mosaic.fit sizes one-line text by its ink and sets --m-fit-shift to centre that ink in the box. */
+[data-fit]:not([data-fit="wrap"]) > * { position: relative; top: var(--m-fit-shift, 0px); }
 
 /* ---------- rules */
 
@@ -191,8 +193,9 @@
 .m-hero > [data-fit] { flex: 1; height: 100%; display: flex; align-items: center; }
 
 /* An icon in a square of its own, sized by the box it sits in. */
-.m-iconbox { display: grid; place-items: center; aspect-ratio: 1; flex: none; font-size: calc(var(--m-u) * 9); min-width: 0; }
-.m-iconbox .m-icon { font-size: 0.8em; }
+.m-iconbox { display: grid; place-items: center; aspect-ratio: 1; flex: none; font-size: calc(var(--m-u) * 9); min-width: 1em; min-height: 1em; container-type: size; }
+/* The icon is a share of whatever square the box ends up, however its size was set. */
+.m-iconbox .m-icon { font-size: max(1em, 70cqmin); }
 
 /* ---------- data */
 
@@ -223,7 +226,7 @@
 .m-spark { position: relative; min-height: 0; }
 .m-spark svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .m-spark__line { fill: none; stroke: var(--m-ink); stroke-width: max(1.5px, calc(var(--m-u) * 0.4)); vector-effect: non-scaling-stroke; }
-.m-spark__now { fill: var(--m-accent); }
+.m-spark__now { position: absolute; width: max(6px, calc(var(--m-u) * 1.6)); aspect-ratio: 1; border-radius: 50%; background: var(--m-accent); transform: translate(-50%, -50%); }
 
 /* How far through something: set --m-value (0 to 1) on the element. */
 .m-meter { position: relative; height: max(6px, calc(var(--m-u) * 2)); border: var(--m-rule) solid var(--m-ink); }
@@ -243,7 +246,7 @@
 
 /* A line and who said it. */
 .m-quote { margin: 0; display: flex; flex-direction: column; gap: var(--m-gap); min-height: 0; }
-.m-quote__text { flex: 1; min-height: 0; font-family: var(--m-font-display); font-weight: var(--m-w-display); line-height: 1.2; }
+.m-quote__text { flex: 1; min-height: 0; margin: 0; font-family: var(--m-font-display); font-weight: var(--m-w-display); line-height: 1.2; }
 .m-quote__by { font-family: var(--m-font-label); font-weight: var(--m-w-label); font-size: var(--m-fs-s); text-transform: var(--m-label-case); letter-spacing: var(--m-label-track); }
 
 /* What to show when there is nothing to show yet. */

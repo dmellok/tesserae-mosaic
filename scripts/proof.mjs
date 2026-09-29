@@ -25,7 +25,9 @@ const ASSETS = resolve(process.env.TESSERAE_PUBLIC || "../tesserae-cloud/public"
 const MIME = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".mjs": "text/javascript", ".json": "application/json", ".woff2": "font/woff2", ".woff": "font/woff", ".ttf": "font/ttf", ".svg": "image/svg+xml", ".png": "image/png" };
 const server = createServer((req, res) => {
   const url = decodeURIComponent((req.url || "/").split("?")[0]);
-  const path = url.startsWith("/assets/") ? join(ASSETS, url.slice(8)) : join(ROOT, url);
+  // Fonts and icons are the host's: /assets/ for the page's own links, and /fonts/ and /icons/ for
+  // the url()s inside faces.css and the icon stylesheets, which are written root-relative.
+  const path = url.startsWith("/assets/") ? join(ASSETS, url.slice(8)) : /^\/(fonts|icons)\//.test(url) ? join(ASSETS, url.slice(1)) : join(ROOT, url);
   if (!existsSync(path) || statSync(path).isDirectory()) { res.writeHead(404); res.end(); return; }
   res.writeHead(200, { "Content-Type": MIME[extname(path)] || "application/octet-stream" });
   res.end(readFileSync(path));
@@ -45,7 +47,9 @@ const INSPECT = `(() => {
     const r = el.getBoundingClientRect(); if (!r.width && !r.height) continue;
     const cs = getComputedStyle(el); if (cs.visibility === "hidden" || cs.display === "none") continue;
     if (r.right > R.right + 1 || r.bottom > R.bottom + 1 || r.left < R.left - 1 || r.top < R.top - 1) out.push("off the panel: " + name(el));
-    else if ((el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) && cs.overflow !== "visible" && !/\\d/.test(cs.webkitLineClamp || "")) out.push("cut short: " + name(el) + (el.textContent ? " (" + el.textContent.trim().slice(0, 30) + ")" : ""));
+    // One-line fitted text is sized by its ink and nudged to centre it, so its line box may overhang
+    // the box while the glyphs do not; only its width is checked.
+    else if (el.matches('[data-fit]:not([data-fit="wrap"])') ? el.scrollWidth > el.clientWidth + 1 : ((el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) && cs.overflow !== "visible" && !/\\d/.test(cs.webkitLineClamp || ""))) out.push("cut short: " + name(el) + (el.textContent ? " (" + el.textContent.trim().slice(0, 30) + ")" : ""));
   }
   return [...new Set(out)].slice(0, 8);
 })()`;

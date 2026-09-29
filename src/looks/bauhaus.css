@@ -1,2 +1,315 @@
-/* Mosaic look: bauhaus. Being written. */
-.m[data-look="bauhaus"] {}
+/*
+ * Mosaic look: bauhaus.
+ *
+ * Solid blocks of red, yellow, blue and a neutral tint, cut apart by thick ink rules; very heavy
+ * type (Archivo Black for numerals and big words, Inter 800 for labels); uppercase tracked labels;
+ * big bold icons in coloured squares.
+ *
+ * The rules are the page's ink showing through the gaps between its sections: the page is ink,
+ * its gap is the heavy rule, and each section on it is a paper (or coloured) block. A row, split,
+ * grid or stack placed straight on the page does the same one level down, so its parts meet at
+ * rules too. Sections are inset with a transparent border, which a section's own padding (a
+ * window's, a list's) does not have to know about.
+ *
+ * On a one-bit panel every block prints solid black with white type, and the few things told apart
+ * by colour alone (today's dot, the current bar) change shape instead.
+ */
+
+.m[data-look="bauhaus"] {
+  --m-font-text: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --m-font-display: "Archivo Black", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --m-font-num: var(--m-font-display);
+  --m-font-label: var(--m-font-text);
+  --m-w-text: 800;
+  --m-w-display: 400;
+  --m-w-num: 400;
+  --m-w-label: 800;
+  --m-label-case: uppercase;
+  --m-label-track: 0.14em;
+  --m-num-track: -0.035em;
+  --m-rule: max(1px, calc(var(--m-u) * 0.5));
+  --m-rule-heavy: max(2px, calc(var(--m-u) * 1.2));
+  --m-radius: 0px;
+  --m-gap: calc(var(--m-u) * 2.6);
+  --m-pad: max(5px, calc(var(--m-u) * 3.4));
+  --m-icons: phosphor;
+  --m-icon-weight: bold;
+  --m-accent: var(--m-red);
+
+  --m-b1: var(--m-red);
+  --m-b1-on: var(--m-on);
+  --m-b2: var(--m-yellow);
+  --m-b2-on: var(--m-ink);
+  --m-b3: var(--m-blue);
+  --m-b3-on: var(--m-on);
+  --m-bt: var(--m-tint);
+  --m-bt-on: var(--m-ink);
+  --m-bi: var(--m-ink);
+  --m-bi-on: var(--m-paper);
+
+  /* The inset of a section, and the small inset of a label block. */
+  --bh-in: var(--m-pad);
+  --bh-in-s: max(3px, calc(var(--m-u) * 1.5));
+}
+@container m (max-height: 219px) {
+  .m[data-look="bauhaus"] .m-page { --bh-in: max(4px, calc(var(--m-u) * 2.4)); --bh-in-s: 2px; }
+}
+.m[data-look="bauhaus"][data-bits="1"] { --m-b2-on: var(--m-on); }
+
+/* ---------- the page: ink, with its sections meeting at heavy rules */
+
+.m[data-look="bauhaus"] .m-page {
+  padding: 0;
+  gap: var(--m-rule-heavy);
+  background: var(--m-ink);
+}
+/* A row, split, grid or stack straight on the page is ruled the same way. */
+.m[data-look="bauhaus"] .m-page > :is(.m-row, .m-split, .m-grid, .m-stack) {
+  gap: var(--m-rule-heavy);
+  background: var(--m-ink);
+  align-items: stretch;
+}
+/* Every section is a paper block, inset by a transparent border (zero specificity past the look,
+   so a block's own colour always wins). */
+.m[data-look="bauhaus"] :where(.m-page, .m-page > :is(.m-row, .m-split, .m-grid, .m-stack)) > :where(*) {
+  background: var(--m-paper);
+  border: var(--bh-in) solid transparent;
+  align-content: center;
+}
+.m[data-look="bauhaus"] :where(.m-page) > :where(.m-row, .m-split, .m-grid, .m-stack) {
+  border: 0;
+}
+
+/* ---------- text */
+
+.m[data-look="bauhaus"] .m-display { letter-spacing: -0.02em; }
+.m[data-look="bauhaus"] .m-mute { color: var(--m-mute); }
+
+/* ---------- surfaces */
+
+.m[data-look="bauhaus"] .m-block { background: var(--m-bt); color: var(--m-bt-on); padding: var(--bh-in); }
+.m[data-look="bauhaus"] .m-block--1 { background: var(--m-b1); color: var(--m-b1-on); }
+.m[data-look="bauhaus"] .m-block--2 { background: var(--m-b2); color: var(--m-b2-on); }
+.m[data-look="bauhaus"] .m-block--3 { background: var(--m-b3); color: var(--m-b3-on); }
+.m[data-look="bauhaus"] .m-block--ink { background: var(--m-bi); color: var(--m-bi-on); }
+.m[data-look="bauhaus"] .m-block--paper { background: var(--m-paper); color: var(--m-ink); }
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-block { border: 0; }
+
+/* The caption of a window or a quote: a heavy tracked label behind a red square. */
+.m[data-look="bauhaus"] .m-window[data-cap]::before,
+.m[data-look="bauhaus"] .m-quote[data-cap]::before {
+  content: attr(data-cap);
+  justify-self: start;
+  align-self: start;
+  display: block;
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--m-fs-xs);
+  text-transform: var(--m-label-case);
+  letter-spacing: var(--m-label-track);
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+  border-left: 1em solid var(--m-b1);
+  padding-left: 0.6em;
+}
+
+/* A window: a section with a heavy ink border; on the page, the rules are its border. */
+.m[data-look="bauhaus"] .m-window {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: minmax(0, 1fr);
+  gap: max(4px, calc(var(--m-u) * 1.8));
+  padding: var(--bh-in);
+  border: var(--m-rule-heavy) solid var(--m-ink);
+  background: var(--m-paper);
+}
+.m[data-look="bauhaus"] .m-window[data-cap] { grid-template-rows: auto; }
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-window { border: 0; }
+
+/* The masthead: a row of blocks. The first is red with heavy white type, the last yellow. */
+.m[data-look="bauhaus"] .m-masthead {
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: var(--m-rule-heavy);
+  background: var(--m-ink);
+  border: 0;
+  padding: 0;
+}
+.m[data-look="bauhaus"] .m-masthead > * {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: block;
+  align-content: center;
+  padding: max(4px, calc(var(--m-u) * 2)) var(--bh-in);
+  background: var(--m-paper);
+  color: var(--m-ink);
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--m-fs-s);
+  text-transform: var(--m-label-case);
+  letter-spacing: var(--m-label-track);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.m[data-look="bauhaus"] .m-masthead > :empty { display: none; }
+.m[data-look="bauhaus"] .m-masthead > :first-child {
+  flex-grow: 2;
+  background: var(--m-b1);
+  color: var(--m-b1-on);
+  font-family: var(--m-font-display);
+  font-weight: var(--m-w-display);
+  font-size: var(--m-fs-l);
+  letter-spacing: -0.01em;
+  line-height: 1;
+  text-align: left;
+  white-space: normal;
+  text-wrap: balance;
+}
+/* Taller than wide: the first block takes a row of its own. */
+@container m (orientation: portrait) {
+  .m[data-look="bauhaus"] .m-masthead > :first-child { flex-basis: 100%; }
+}
+.m[data-look="bauhaus"] .m-masthead > :nth-child(2):not(:last-child) { text-align: center; }
+.m[data-look="bauhaus"] .m-masthead > :last-child:not(:first-child) {
+  background: var(--m-b2);
+  color: var(--m-b2-on);
+  text-align: right;
+}
+/* On one bit the red and yellow blocks would print as one black bar: the last turns paper. */
+.m[data-look="bauhaus"][data-bits="1"] .m-masthead > :last-child:not(:first-child) { background: var(--m-paper); color: var(--m-ink); }
+
+/* The hero: the one big thing, in the heaviest face. */
+.m[data-look="bauhaus"] .m-hero { font-family: var(--m-font-num); font-weight: var(--m-w-num); }
+
+/* An icon in a blue square (core draws the icon at a share of the square). */
+.m[data-look="bauhaus"] .m-iconbox {
+  min-width: 1.4em;
+  min-height: 1.4em;
+  background: var(--m-b3);
+  color: var(--m-b3-on);
+  border: 0;
+  padding: 0;
+}
+
+/* ---------- data */
+
+.m[data-look="bauhaus"] .m-stat { gap: max(2px, calc(var(--m-u) * 0.9)); }
+.m[data-look="bauhaus"] .m-stat__label { line-height: 1.1; }
+.m[data-look="bauhaus"] .m-stat__value { letter-spacing: var(--m-num-track); }
+.m[data-look="bauhaus"] .m-stat__value .m-clock__period { font-size: 0.42em; }
+.m[data-look="bauhaus"] .m-stat--hero .m-stat__value { font-size: max(20px, calc(var(--m-u) * 16)); line-height: 0.95; }
+.m[data-look="bauhaus"] .m-stat__sub { color: inherit; font-weight: var(--m-w-label); }
+
+/* Stats: tiles meeting at heavy rules, tinted inside a section. On the page they take the block colours in turn:
+   red (first of three or more), tint, paper, and blue for the last. */
+.m[data-look="bauhaus"] .m-stats { gap: var(--m-rule-heavy); background: var(--m-ink); }
+.m[data-look="bauhaus"] .m-stats > * { background: var(--m-bt); color: var(--m-bt-on); justify-content: center; padding: var(--bh-in-s) max(4px, calc(var(--m-u) * 2.2)); }
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-stats { border: 0; }
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-stats > * { padding: var(--bh-in); background: var(--m-paper); color: var(--m-ink); }
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-stats .m-stat__value { font-size: max(14px, calc(var(--m-u) * 7.5)); }
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-stats > :nth-child(even) { background: var(--m-bt); color: var(--m-bt-on); }
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-stats > :first-child:nth-last-child(n+3) { background: var(--m-b1); color: var(--m-b1-on); }
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-stats > :last-child:not(:first-child) { background: var(--m-b3); color: var(--m-b3-on); }
+
+/* The clock. */
+.m[data-look="bauhaus"] .m-clock { letter-spacing: -0.04em; }
+.m[data-look="bauhaus"] .m-clock__period { letter-spacing: 0.06em; margin-left: 0.18em; font-size: 0.2em; }
+
+/* Bars: solid ink, the current one red. */
+.m[data-look="bauhaus"] .m-bars { gap: max(2px, calc(var(--m-u) * 1.2)); }
+.m[data-look="bauhaus"] .m-bars__val { font-family: var(--m-font-label); font-weight: var(--m-w-label); letter-spacing: 0; }
+.m[data-look="bauhaus"] .m-bars__tick { font-weight: var(--m-w-label); letter-spacing: 0.04em; text-transform: var(--m-label-case); }
+.m[data-look="bauhaus"][data-bits="1"] .m-bars__col--now .m-bars__bar {
+  background: var(--m-paper);
+  border: var(--m-rule-heavy) solid var(--m-ink);
+}
+
+/* The line. */
+.m[data-look="bauhaus"] .m-spark__line { stroke-width: max(2px, calc(var(--m-u) * 0.8)); stroke-linejoin: miter; }
+
+/* The meter: a heavy ink outline, filled with ink. */
+.m[data-look="bauhaus"] .m-meter {
+  box-sizing: content-box;
+  height: max(8px, calc(var(--m-u) * 3));
+  border: 0;
+  flex: none;
+}
+.m[data-look="bauhaus"] .m-meter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: var(--m-rule-heavy) solid var(--m-ink);
+}
+/* Straight on the page it is a strip across the foot, between the rules and the panel's edge:
+   a tint track with a red fill, held off the rule above so an ink fill (one bit) stays its own bar. */
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-meter {
+  border: 0;
+  border-top: max(2px, calc(var(--m-u) * 0.8)) solid transparent;
+  height: max(8px, calc(var(--m-u) * 3.2));
+  background: var(--m-tint);
+}
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-meter::before { background: var(--m-b1); }
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-meter::after { content: none; }
+
+/* Dots: ink circles, today red; on one bit today is a square. */
+.m[data-look="bauhaus"] .m-dots__dot { border-width: max(1px, calc(var(--m-u) * 0.3)); }
+.m[data-look="bauhaus"][data-bits="1"] .m-dots__dot--now { border-radius: 0; }
+
+/* The list: numbers in squares of red, yellow and blue in turn, rules between rows. */
+.m[data-look="bauhaus"] .m-list { font-weight: var(--m-w-text); }
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-list { border-top-width: var(--bh-in-s); border-bottom-width: var(--bh-in-s); }
+.m[data-look="bauhaus"] .m-list__item {
+  align-items: center;
+  gap: max(6px, calc(var(--m-u) * 2.4));
+  padding: max(3px, calc(var(--m-u) * 1.4)) 0;
+  border-bottom: var(--m-rule) solid var(--m-ink);
+  line-height: 1.2;
+}
+.m[data-look="bauhaus"] .m-list__item:last-child { border-bottom: 0; }
+.m[data-look="bauhaus"] .m-list__n {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  width: 2em;
+  height: 2em;
+  background: var(--m-b1);
+  color: var(--m-b1-on);
+  font-size: 0.9em;
+  letter-spacing: -0.02em;
+}
+.m[data-look="bauhaus"] .m-list__item:nth-child(3n + 2) .m-list__n { background: var(--m-b2); color: var(--m-b2-on); }
+.m[data-look="bauhaus"] .m-list__item:nth-child(3n + 3) .m-list__n { background: var(--m-b3); color: var(--m-b3-on); }
+
+/* The quote: heavy words, and who said them on a blue bar across the foot. */
+.m[data-look="bauhaus"] .m-quote { gap: 0; }
+.m[data-look="bauhaus"] :where(.m-page, .m-page > *) > .m-quote { border: 0; }
+.m[data-look="bauhaus"] .m-quote[data-cap]::before { flex: none; margin: var(--bh-in) var(--bh-in) 0; }
+.m[data-look="bauhaus"] .m-quote__text { text-wrap: pretty; padding: var(--bh-in); line-height: 1.1; letter-spacing: -0.015em; }
+.m[data-look="bauhaus"] .m-quote__by {
+  flex: none;
+  padding: max(4px, calc(var(--m-u) * 2.2)) var(--bh-in);
+  background: var(--m-b3);
+  color: var(--m-b3-on);
+  font-size: var(--m-fs-s);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Nothing yet: quiet, centred. */
+.m[data-look="bauhaus"] .m-empty {
+  color: var(--m-mute);
+  font-weight: var(--m-w-label);
+  font-size: var(--m-fs-s);
+  letter-spacing: 0.02em;
+}
+
+/* Taller than wide, a dozen bars leave a tick too little room for "10 AM": let it take two lines,
+   with every tick given the same two-line height so the bars still stand on one baseline. */
+@container m (orientation: portrait) {
+  .m[data-look="bauhaus"] .m-bars__tick { white-space: normal; text-align: center; line-height: 1.05; min-height: 2.1em; letter-spacing: 0; }
+}

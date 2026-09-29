@@ -1,2 +1,356 @@
-/* Mosaic look: pixel. Being written. */
-.m[data-look="pixel"] {}
+/*
+ * Mosaic look: pixel. E-ink's limits worn as the style, like an old handheld game screen.
+ *
+ * VT323 for numerals, Silkscreen for labels and captions, Pixelify Sans for anything longer.
+ * Windows have a chunky double border (a thick outer line, a line of paper, a thin inner line)
+ * with the caption on a tab that breaks the top border. Icons are pixel-art bitmaps
+ * (--m-icons: pixel). Texture is a checker dither drawn in ink, which a one-bit panel prints
+ * exactly. Red is kept for the one thing that is now: this hour's bar, today's square.
+ *
+ * Every line and gap is a whole multiple of one chunky pixel (--m-px, worked out from the short
+ * edge and rounded to device pixels), so borders stay crisp. Silkscreen is drawn on an 8px grid,
+ * so labels are a whole multiple of 8px (--m-cf).
+ */
+
+.m[data-look="pixel"] {
+  /* One chunky pixel, one dither cell, and the Silkscreen caption size. */
+  --m-px: max(1px, round(calc(var(--m-u) * 0.625), 1px));
+  --m-dith: max(1px, round(calc(var(--m-u) * 0.42), 1px));
+  --m-cf: max(8px, round(down, calc(var(--m-u) * 3.34), 8px));
+  /* The checker every dithered fill is drawn with. */
+  --m-checker: repeating-conic-gradient(var(--m-ink) 0 25%, transparent 0 50%) 0 0 / calc(var(--m-dith) * 2) calc(var(--m-dith) * 2);
+
+  --m-font-text: "Pixelify Sans", "DotGothic16", monospace;
+  --m-font-display: "Pixelify Sans", "DotGothic16", monospace;
+  --m-font-num: "VT323", monospace;
+  --m-font-label: "Silkscreen", monospace;
+  --m-w-text: 400;
+  --m-w-display: 400;
+  --m-w-num: 400;
+  --m-w-label: 400;
+  --m-label-case: uppercase;
+  --m-label-track: 0.06em;
+  --m-num-track: 0;
+  --m-rule: var(--m-px);
+  --m-rule-heavy: calc(var(--m-px) * 2);
+  --m-radius: 0px;
+  --m-gap: calc(var(--m-px) * 4);
+  --m-pad: calc(var(--m-px) * 5);
+  --m-icons: pixel;
+  --m-accent: var(--m-red);
+
+  /* Blocks are flat: paper, a colour or ink, never a grey tint. */
+  --m-b1: var(--m-red);
+  --m-b1-on: var(--m-on);
+  --m-b2: var(--m-yellow);
+  --m-b2-on: var(--m-ink);
+  --m-b3: var(--m-blue);
+  --m-b3-on: var(--m-on);
+  --m-bt: var(--m-paper);
+  --m-bt-on: var(--m-ink);
+  --m-bi: var(--m-ink);
+  --m-bi-on: var(--m-paper);
+
+  /* VT323 is narrow and sits small, and pixel faces want room: the scale runs larger. */
+  --m-fs-xs: var(--m-cf);
+  --m-fs-s: max(10px, round(calc(var(--m-u) * 3.4), 1px));
+  --m-fs-m: max(12px, round(calc(var(--m-u) * 4.6), 1px));
+  --m-fs-l: max(18px, round(calc(var(--m-u) * 9), 1px));
+  --m-fs-xl: max(22px, round(calc(var(--m-u) * 14), 1px));
+  --m-fs-xxl: max(24px, round(calc(var(--m-u) * 20), 1px));
+
+  /* The window frame: a thick outer line, a line of paper, a thin inner line. */
+  --m-frame: inset 0 0 0 var(--m-px) var(--m-paper), inset 0 0 0 calc(var(--m-px) * 2) var(--m-ink);
+
+  line-height: 1.2;
+}
+
+/* ---------- text */
+
+.m[data-look="pixel"] .m-label { font-size: var(--m-cf); line-height: 1; }
+.m[data-look="pixel"] .m-num { line-height: 0.9; }
+.m[data-look="pixel"] .m-display { line-height: 1.15; }
+.m[data-look="pixel"] .m-mute { color: var(--m-ink); }
+
+/* ---------- rules: whole pixels, and a dotted rule for the lighter kind */
+
+.m[data-look="pixel"] .m-rule { border-top-width: var(--m-px); }
+.m[data-look="pixel"] .m-rule--heavy { border-top-width: calc(var(--m-px) * 2); }
+.m[data-look="pixel"] .m-rule--double { border-top-width: calc(var(--m-px) * 2); border-bottom-width: var(--m-px); height: calc(var(--m-px) * 4); }
+.m[data-look="pixel"] .m-rule--v { border-left-width: var(--m-px); }
+
+/* ---------- windows */
+
+.m[data-look="pixel"] .m-window,
+.m[data-look="pixel"] .m-block {
+  border: calc(var(--m-px) * 2) solid var(--m-ink);
+  box-shadow: var(--m-frame);
+  padding: calc(var(--m-px) * 5);
+}
+.m[data-look="pixel"] .m-block--1 { border-color: var(--m-ink); }
+.m[data-look="pixel"] .m-block--ink { box-shadow: inset 0 0 0 var(--m-px) var(--m-ink), inset 0 0 0 calc(var(--m-px) * 2) var(--m-paper); }
+
+/* The caption sits on a patch of paper across the top border; the margin makes room for the half
+   of it that stands above the window. */
+.m[data-look="pixel"] .m-window[data-cap] {
+  margin-top: calc(var(--m-cf) / 2);
+  padding-top: max(calc(var(--m-px) * 5), calc(var(--m-cf) / 2 + var(--m-px) * 2));
+}
+.m[data-look="pixel"] .m-window[data-cap]::before {
+  content: attr(data-cap);
+  position: absolute;
+  left: calc(var(--m-px) * 4);
+  top: calc(var(--m-px) * -1);
+  transform: translateY(-50%);
+  max-width: calc(100% - var(--m-px) * 8);
+  overflow: hidden;
+  padding: 0 calc(var(--m-px) * 2);
+  background: var(--m-paper);
+  color: var(--m-ink);
+  font: 700 var(--m-cf) / 1 var(--m-font-label);
+  letter-spacing: var(--m-label-track);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.m[data-look="pixel"] .m-window__cap { font-size: var(--m-cf); font-weight: 700; }
+
+/* ---------- masthead: an inverted title strip, like a game's status bar */
+
+.m[data-look="pixel"] .m-masthead {
+  align-items: center;
+  gap: calc(var(--m-px) * 4);
+  padding: calc(var(--m-px) * 2.5) calc(var(--m-px) * 5);
+  background: var(--m-ink);
+  color: var(--m-paper);
+  box-shadow: inset 0 0 0 var(--m-px) var(--m-ink), inset 0 0 0 calc(var(--m-px) * 2) var(--m-paper);
+  font-family: var(--m-font-label);
+  font-size: var(--m-cf);
+  letter-spacing: var(--m-label-track);
+  text-transform: uppercase;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+/* The last slot (a date, a count) keeps to one line; the others wrap before they would be cut. */
+.m[data-look="pixel"] .m-masthead > * { min-width: 0; white-space: normal; }
+.m[data-look="pixel"] .m-masthead > :last-child:not(:first-child) { white-space: nowrap; flex: none; }
+.m[data-look="pixel"] .m-masthead > :first-child { font-weight: 700; flex: 0 1 auto; }
+.m[data-look="pixel"] .m-masthead > :last-child:not(:first-child) { text-align: right; }
+.m[data-look="pixel"] .m-masthead > :nth-child(2):not(:last-child) { text-align: center; }
+
+/* ---------- hero: a window of its own, the big thing centred in it */
+
+.m[data-look="pixel"] .m-hero {
+  border: calc(var(--m-px) * 2) solid var(--m-ink);
+  box-shadow: var(--m-frame);
+  padding: calc(var(--m-px) * 4) calc(var(--m-px) * 6);
+}
+.m[data-look="pixel"] .m-hero > [data-fit] { justify-content: center; text-align: center; }
+
+.m[data-look="pixel"] .m-clock { line-height: 1; }
+/* The am/pm sits on the numerals' baseline, raised so its top is level with theirs: VT323's
+   numerals stand 0.56em, Silkscreen's capitals 0.62em. It keeps the fit's centring shift. */
+.m[data-look="pixel"] .m-clock__period { font-size: max(8px, 0.2em); font-weight: 700; margin-left: 0.3em; letter-spacing: 0.04em; top: calc(var(--m-fit-shift, 0px) - 2.2em); }
+.m[data-look="pixel"] .m-clock__period, .m[data-look="pixel"] .m-stat__value .m-clock__period { position: relative; }
+
+/* ---------- icons: pixel bitmaps drawn at a whole number of device pixels a cell */
+
+/* In a box a bitmap is the largest whole multiple of its own width in cells that fits most of the
+   square, so every cell is a whole number of device pixels. --m-cells is the bitmap's width. */
+.m[data-look="pixel"] .m-iconbox svg { --m-cells: 16px; width: max(var(--m-cells), round(down, 88cqmin, var(--m-cells))) !important; height: auto !important; }
+.m[data-look="pixel"] .m-iconbox svg[viewBox^="0 0 13 "] { --m-cells: 13px; }
+.m[data-look="pixel"] .m-iconbox svg[viewBox^="0 0 12 "] { --m-cells: 12px; }
+.m[data-look="pixel"] .m-iconbox svg[viewBox^="0 0 10 "] { --m-cells: 10px; }
+.m[data-look="pixel"] .m-icon svg[viewBox="0 0 4 7"] { width: max(4px, round(down, 0.57em, 4px)) !important; height: auto !important; }
+
+/* ---------- stats: the figure over its name, and in a row of their own, small windows */
+
+.m[data-look="pixel"] .m-stat { flex-direction: column-reverse; justify-content: flex-end; gap: var(--m-px); }
+.m[data-look="pixel"] .m-stat__label { font-size: var(--m-cf); line-height: 1; }
+.m[data-look="pixel"] .m-stat__value { font-size: var(--m-fs-l); line-height: 0.9; white-space: nowrap; }
+.m[data-look="pixel"] .m-stat__sub { color: var(--m-ink); font-size: var(--m-cf); }
+.m[data-look="pixel"] .m-stat--hero .m-stat__value { font-size: var(--m-fs-xl); }
+.m[data-look="pixel"] .m-stat__value .m-clock__period { font-size: max(8px, 0.32em); margin-left: 0.15em; top: -1.1em; }
+
+.m[data-look="pixel"] .m-stats { gap: calc(var(--m-px) * 4); }
+.m[data-look="pixel"] .m-stats > .m-stat {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: calc(var(--m-px) * 2) solid var(--m-ink);
+  box-shadow: var(--m-frame);
+  padding: calc(var(--m-px) * 4) calc(var(--m-px) * 3);
+}
+/* Inside a window a row of stats is already framed: no windows in windows. */
+.m[data-look="pixel"] .m-window .m-stats > .m-stat { border: 0; box-shadow: none; padding: 0; align-items: flex-start; text-align: left; }
+
+/* ---------- bars: dithered columns, this hour solid red */
+
+.m[data-look="pixel"] .m-bars { gap: var(--m-px); }
+.m[data-look="pixel"] .m-bars__col { gap: var(--m-px); }
+.m[data-look="pixel"] .m-bars__bar {
+  border: var(--m-px) solid var(--m-ink);
+  background: var(--m-checker);
+  min-height: calc(var(--m-px) * 3);
+}
+.m[data-look="pixel"] .m-bars__col--now .m-bars__bar { background: var(--m-accent); border-color: var(--m-accent); }
+.m[data-look="pixel"] .m-bars__val { font-size: max(14px, round(calc(var(--m-u) * 5.5), 1px)); line-height: 0.9; }
+.m[data-look="pixel"] .m-bars__tick { color: var(--m-ink); font-size: max(8px, round(down, calc(var(--m-u) * 2.5), 8px)); line-height: 1; letter-spacing: 0; }
+
+/* ---------- spark: a whole-pixel line */
+
+.m[data-look="pixel"] .m-spark__now { width: max(4px, calc(var(--m-px) * 3)); border-radius: 0; }
+.m[data-look="pixel"] .m-spark__line { stroke-width: calc(var(--m-px) * 1); stroke-linejoin: miter; stroke-linecap: square; shape-rendering: crispEdges; }
+
+/* ---------- meter: an XP bar, a window's double line with a solid fill in blocks */
+
+.m[data-look="pixel"] .m-meter {
+  flex: none;
+  height: max(10px, calc(var(--m-px) * 10));
+  border: calc(var(--m-px) * 2) solid var(--m-ink);
+}
+.m[data-look="pixel"] .m-meter::before {
+  inset: var(--m-px) auto var(--m-px) var(--m-px);
+  width: calc((100% - var(--m-px) * 2) * var(--m-value, 0));
+  background: var(--m-ink);
+}
+
+/* ---------- dots: squares, past ones dithered, today red, the rest outlined */
+
+.m[data-look="pixel"] .m-dots__dot { border-radius: 0; border-width: max(1px, round(down, calc(var(--m-u) * 0.25), 1px)); }
+.m[data-look="pixel"] .m-dots__dot--done { background: var(--m-checker); }
+.m[data-look="pixel"] .m-dots__dot--now { background: var(--m-accent); border-color: var(--m-accent); }
+
+/* ---------- list: a game menu, the first row picked out and pointed at */
+
+/* On its own the menu is a window; inside one it is just the rows. */
+.m[data-look="pixel"] .m-list {
+  gap: 0;
+  border: calc(var(--m-px) * 2) solid var(--m-ink);
+  box-shadow: var(--m-frame);
+  padding: calc(var(--m-px) * 5) calc(var(--m-px) * 4);
+}
+.m[data-look="pixel"] .m-window .m-list { border: 0; box-shadow: none; padding: 0; }
+/* Rows that did not fit are counted on a tab across the bottom border, as a game menu says there
+   is more below. Mosaic.list removes what does not fit, so nothing spills when the list shows its
+   overflow, and the tab can stand over the frame. */
+.m[data-look="pixel"] .m-list { position: relative; overflow: visible; }
+.m[data-look="pixel"] .m-list[data-more]::after {
+  content: attr(data-more);
+  position: absolute;
+  right: calc(var(--m-px) * 4);
+  bottom: calc(var(--m-px) * -1);
+  transform: translateY(50%);
+  padding: 0 calc(var(--m-px) * 2);
+  background: var(--m-paper);
+  font: 700 var(--m-cf) / 1 var(--m-font-label);
+  letter-spacing: var(--m-label-track);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.m[data-look="pixel"] .m-window .m-list[data-more]::after { bottom: 0; transform: none; padding-right: 0; }
+.m[data-look="pixel"] .m-list__item {
+  --m-arrow: max(1px, round(down, calc(1em / 11), 1px));
+  align-items: baseline;
+  gap: calc(var(--m-px) * 3);
+  padding: calc(var(--m-px) * 2) calc(var(--m-px) * 3);
+  border-bottom: 0;
+  background: linear-gradient(90deg, var(--m-ink) 50%, transparent 0) 0 100% / calc(var(--m-px) * 2) var(--m-px) repeat-x;
+  font-family: var(--m-font-text);
+  font-size: max(12px, round(calc(var(--m-u) * 5), 1px));
+  line-height: 1.25;
+}
+.m[data-look="pixel"] .m-list__item::before {
+  content: "";
+  flex: none;
+  align-self: flex-start;
+  width: calc(var(--m-arrow) * 4);
+  height: calc(var(--m-arrow) * 7);
+  margin-top: calc((1.25em - var(--m-arrow) * 7) / 2);
+  clip-path: polygon(0 0, 25% 0, 25% 14.2857%, 50% 14.2857%, 50% 28.5714%, 75% 28.5714%, 75% 42.8571%, 100% 42.8571%, 100% 57.1429%, 75% 57.1429%, 75% 71.4286%, 50% 71.4286%, 50% 85.7143%, 25% 85.7143%, 25% 100%, 0 100%);
+}
+.m[data-look="pixel"] .m-list__item:first-child { background: var(--m-ink); color: var(--m-paper); }
+.m[data-look="pixel"] .m-list__item:first-child::before { background: currentColor; }
+.m[data-look="pixel"] .m-list__n { min-width: 1.2em; font-size: 1.2em; line-height: 1; }
+
+/* ---------- quote: an RPG dialogue box, the speaker on an inverted tab across the top border */
+
+.m[data-look="pixel"] .m-quote {
+  position: relative;
+  border: calc(var(--m-px) * 2) solid var(--m-ink);
+  box-shadow: var(--m-frame);
+  margin-top: calc(var(--m-cf) / 2 + var(--m-px) * 2);
+  padding: calc(var(--m-cf) / 2 + var(--m-px) * 6) calc(var(--m-px) * 8) calc(var(--m-px) * 10);
+}
+.m[data-look="pixel"] .m-quote__text {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-family: var(--m-font-display);
+  line-height: 1.3;
+}
+.m[data-look="pixel"] .m-quote__by {
+  position: absolute;
+  left: calc(var(--m-px) * 6);
+  top: calc(var(--m-px) * -1);
+  transform: translateY(-50%);
+  max-width: calc(100% - var(--m-px) * 12);
+  overflow: hidden;
+  padding: calc(var(--m-px) * 2) calc(var(--m-px) * 3);
+  background: var(--m-ink);
+  color: var(--m-paper);
+  font: 700 var(--m-cf) / 1 var(--m-font-label);
+  letter-spacing: var(--m-label-track);
+  white-space: nowrap;
+}
+/* The caption, when there is one, on a paper tab breaking the bottom border. */
+.m[data-look="pixel"] .m-quote[data-cap] { margin-bottom: calc(var(--m-cf) / 2); }
+.m[data-look="pixel"] .m-quote[data-cap]::before {
+  content: attr(data-cap);
+  position: absolute;
+  left: calc(var(--m-px) * 4);
+  bottom: calc(var(--m-px) * -1);
+  transform: translateY(50%);
+  max-width: calc(100% - var(--m-px) * 22);
+  overflow: hidden;
+  padding: 0 calc(var(--m-px) * 2);
+  background: var(--m-paper);
+  font: 400 var(--m-cf) / 1 var(--m-font-label);
+  letter-spacing: var(--m-label-track);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+/* The "more" marker a game blinks at the end of a line, drawn still. */
+.m[data-look="pixel"] .m-quote::after {
+  content: "";
+  position: absolute;
+  right: calc(var(--m-px) * 6);
+  bottom: calc(var(--m-px) * 3);
+  width: calc(var(--m-px) * 7);
+  height: calc(var(--m-px) * 4);
+  background: var(--m-ink);
+  clip-path: polygon(0 0, 100% 0, 100% 25%, 85.7143% 25%, 85.7143% 50%, 71.4286% 50%, 71.4286% 75%, 57.1429% 75%, 57.1429% 100%, 42.8571% 100%, 42.8571% 75%, 28.5714% 75%, 28.5714% 50%, 14.2857% 50%, 14.2857% 25%, 0 25%);
+}
+
+/* ---------- empty: a terminal prompt with a block cursor */
+
+.m[data-look="pixel"] .m-empty {
+  display: block;
+  align-content: center;
+  color: var(--m-ink);
+  font-family: var(--m-font-text);
+  font-size: max(12px, round(calc(var(--m-u) * 5), 1px));
+  line-height: 1.25;
+}
+.m[data-look="pixel"] .m-empty::before { content: ">"; margin-right: 0.4em; font-family: var(--m-font-label); font-weight: 700; }
+.m[data-look="pixel"] .m-empty::after { content: ""; display: inline-block; vertical-align: -0.15em; width: 0.55em; height: 1.05em; margin-left: 0.3em; background: currentColor; }
+
+/* ---------- small panels: thinner frames and tighter windows */
+
+/* A tall panel gives each bar less width: the values set smaller so they keep apart. */
+@container m (orientation: portrait) {
+  .m[data-look="pixel"] .m-bars__val { font-size: max(14px, round(calc(var(--m-u) * 4.4), 1px)); }
+}
+@container m (max-height: 219px) {
+  .m[data-look="pixel"] .m-hero { padding: calc(var(--m-px) * 2) calc(var(--m-px) * 4); }
+  .m[data-look="pixel"] .m-window { padding: calc(var(--m-px) * 3); }
+}

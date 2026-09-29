@@ -1,2 +1,339 @@
-/* Mosaic look: signal. Being written. */
-.m[data-look="signal"] {}
+/*
+ * Mosaic look: signal. Swiss minimal, drawn for a one-bit panel first.
+ *
+ * Ink on paper, enormous geometric numerals (Jost 400), small uppercase JetBrains Mono labels with
+ * open tracking, thick ink rules topping each data cell, generous whitespace, and exactly one
+ * colour: a small red square (--m-accent) marking "now". On a one-bit panel the square prints as
+ * ink and nothing else changes, because nothing else was ever a colour.
+ */
+
+.m[data-look="signal"] {
+  --m-accent: var(--m-red);
+  --m-font-text: "Jost", "Futura", "Century Gothic", sans-serif;
+  --m-font-display: var(--m-font-text);
+  --m-font-num: var(--m-font-text);
+  --m-font-label: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --m-w-text: 400;
+  --m-w-display: 400;
+  --m-w-num: 400;
+  --m-w-label: 400;
+  --m-label-case: uppercase;
+  --m-label-track: 0.1em;
+  --m-num-track: -0.04em;
+  --m-rule: max(1px, calc(var(--m-u) * 0.25));
+  --m-rule-heavy: max(2px, calc(var(--m-u) * 0.6));
+  --m-radius: 0px;
+  --m-gap: calc(var(--m-u) * 3);
+  --m-pad: calc(var(--m-u) * 6);
+  --m-icons: phosphor;
+  --m-icon-weight: regular;
+
+  /* Blocks: ink or paper, never a colour. */
+  --m-b1: var(--m-ink);
+  --m-b1-on: var(--m-paper);
+  --m-b2: var(--m-ink);
+  --m-b2-on: var(--m-paper);
+  --m-b3: var(--m-ink);
+  --m-b3-on: var(--m-paper);
+  --m-bt: var(--m-paper);
+  --m-bt-on: var(--m-ink);
+  --m-bi: var(--m-ink);
+  --m-bi-on: var(--m-paper);
+
+  /* The look's own measures: the label size, the red square, the space under a cell's rule. */
+  --sg-label: max(9px, calc(var(--m-u) * 2.6));
+  --sg-square: 0.75em;
+  --sg-cell: max(3px, calc(var(--m-u) * 1.6));
+
+  /* Text is ink; there is no grey in this look. */
+  --m-mute: var(--m-ink);
+  --m-ink-2: var(--m-ink);
+}
+
+/* ---------- text */
+
+.m[data-look="signal"] .m-label,
+.m[data-look="signal"] .m-window__cap { font-size: var(--sg-label); white-space: nowrap; }
+.m[data-look="signal"] .m-display { letter-spacing: -0.02em; }
+
+/* ---------- surfaces */
+
+.m[data-look="signal"] .m-block { border-top: var(--m-rule-heavy) solid var(--m-ink); }
+.m[data-look="signal"] .m-block--1,
+.m[data-look="signal"] .m-block--2,
+.m[data-look="signal"] .m-block--3,
+.m[data-look="signal"] .m-block--ink { border-top-color: var(--m-bi); }
+
+/* A window is a cell under a thick rule, its caption a mono label in the space the padding keeps. */
+.m[data-look="signal"] .m-window {
+  border-top: var(--m-rule-heavy) solid var(--m-ink);
+  padding: 0;
+}
+.m[data-look="signal"] .m-window[data-cap] { padding-top: calc(var(--sg-cell) + var(--sg-label) * 1.25 + var(--m-gap) * 0.6); }
+.m[data-look="signal"] .m-window[data-cap]::before {
+  content: attr(data-cap);
+  position: absolute;
+  top: var(--sg-cell);
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--sg-label);
+  line-height: 1.25;
+  text-transform: var(--m-label-case);
+  letter-spacing: var(--m-label-track);
+  white-space: nowrap;
+}
+
+/* ---------- masthead: mono labels, left and right, the centre too; the red square before the slot
+   that says when (the centre of three, the right of two). */
+
+.m[data-look="signal"] .m-masthead {
+  align-items: baseline;
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--sg-label);
+  line-height: 1.25;
+  text-transform: var(--m-label-case);
+  letter-spacing: var(--m-label-track);
+}
+.m[data-look="signal"] .m-masthead > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.m[data-look="signal"] .m-masthead > :first-child { flex: 0 1 auto; text-align: left; }
+.m[data-look="signal"] .m-masthead > :last-child { flex: 0 1 auto; text-align: right; margin-left: auto; }
+.m[data-look="signal"] .m-masthead > :nth-child(2):not(:last-child) { flex: 1 1 0; text-align: center; }
+.m[data-look="signal"] .m-masthead > :nth-child(2):not(:last-child):not(:empty)::before,
+.m[data-look="signal"] .m-masthead > :nth-child(2):last-child:not(:empty)::before {
+  content: "";
+  display: inline-block;
+  width: var(--sg-square);
+  height: var(--sg-square);
+  margin-right: 0.7em;
+  background: var(--m-accent);
+  vertical-align: -0.02em;
+}
+
+/* ---------- the big things */
+
+/* Jost's line box is about 1.45 em deep, twice the height of its numerals, and fitting measures
+   that box, so fitted numerals would come out small. Two ways round it, both inside the box:
+   - the clock's numerals sit in a box of their own with paint containment, which keeps the deep
+     line box out of the measure, so the clock grows until its width stops it;
+   - other one-line fitted text stacks from the bottom (column-reverse), where overflow below does
+     not count, on a line box as tall as its capitals, with room kept under the baseline for
+     descenders; it reaches a fifth of an em past its box at top and bottom, into space the
+     numerals never paint, bounded by the page's padding so it never leaves the panel. */
+.m[data-look="signal"] [data-fit]:not([data-fit="wrap"]):not(.m-clock) {
+  --sg-trim: min(0.2em, var(--m-pad));
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  align-items: flex-start;
+  line-height: 0.76;
+  padding: 0 0.06em 0.2em 0;
+  margin-block: calc(-1 * var(--sg-trim));
+}
+.m[data-look="signal"] .m-hero > [data-fit]:not([data-fit="wrap"]):not(.m-clock) { height: calc(100% + 2 * var(--sg-trim)); }
+.m[data-look="signal"] .m-clock { letter-spacing: -0.045em; line-height: 0.8; }
+/* In the hero the clock is one line of text, so am/pm sits on the numerals' baseline, and the line is
+   centred in the hero as a whole. */
+.m[data-look="signal"] .m-hero > .m-clock { display: block; align-content: center; }
+.m[data-look="signal"] .m-clock__time { display: inline-block; contain: paint; overflow-clip-margin: 0.03em; }
+/* Its parts are boxes as tall as the numerals too, not Jost's deep line box. */
+.m[data-look="signal"] .m-clock__h,
+.m[data-look="signal"] .m-clock__sep,
+.m[data-look="signal"] .m-clock__m { display: inline-block; }
+/* Portrait stacks the hour over the minutes, so the numerals can be about twice the size. */
+@container m (orientation: portrait) {
+  .m[data-look="signal"] .m-hero > .m-clock .m-clock__h,
+  .m[data-look="signal"] .m-hero > .m-clock .m-clock__m { display: block; line-height: 0.84; }
+  .m[data-look="signal"] .m-hero > .m-clock .m-clock__sep { display: none; }
+}
+.m[data-look="signal"] .m-clock__period {
+  font-size: max(9px, 0.16em);
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  letter-spacing: 0.1em;
+  margin-left: 0.5em;
+}
+.m[data-look="signal"] .m-num { letter-spacing: -0.04em; }
+
+/* ---------- stats: each a cell under a thick rule, a mono label, a Jost figure */
+
+.m[data-look="signal"] .m-stat {
+  border-top: var(--m-rule-heavy) solid var(--m-ink);
+  padding-top: var(--sg-cell);
+  gap: max(2px, calc(var(--m-u) * 1.2));
+}
+.m[data-look="signal"] .m-stat__label { font-size: var(--sg-label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25; }
+.m[data-look="signal"] .m-stat__value { font-size: max(14px, calc(var(--m-u) * 8)); letter-spacing: -0.03em; white-space: nowrap; }
+.m[data-look="signal"] .m-stat__value .m-clock__period { font-size: max(8px, 0.3em); margin-left: 0.3em; }
+.m[data-look="signal"] .m-stat__sub { font-family: var(--m-font-label); font-size: var(--sg-label); letter-spacing: var(--m-label-track); text-transform: var(--m-label-case); }
+
+/* The hero stat: no rule, the figure first and the label under it. */
+.m[data-look="signal"] .m-stat--hero { border-top: 0; padding-top: 0; }
+.m[data-look="signal"] .m-stat--hero .m-stat__value { order: 1; font-size: max(22px, calc(var(--m-u) * 16)); letter-spacing: -0.05em; line-height: 0.9; }
+.m[data-look="signal"] .m-stat--hero .m-stat__label { order: 2; }
+.m[data-look="signal"] .m-stat--hero .m-stat__sub { order: 3; }
+
+.m[data-look="signal"] .m-stats { gap: var(--m-gap); align-items: start; }
+/* In portrait a row that carries a run of stats gives them a line of their own. */
+@container m (orientation: portrait) {
+  .m[data-look="signal"] .m-row:has(> .m-stats) { flex-wrap: wrap; row-gap: var(--m-gap); }
+  .m[data-look="signal"] .m-row > .m-stats { flex: 1 1 100%; }
+}
+
+/* ---------- icons: a plain regular-weight glyph, no frame */
+
+/* The box is as wide as the glyph (one em of the box's font), however tall the layout makes it, so an
+   icon never grows past the type beside it or takes the width a figure needs. */
+.m[data-look="signal"] .m-iconbox { aspect-ratio: auto; font-size: max(18px, calc(var(--m-u) * 9)); place-items: center; min-width: 1em; min-height: 1em; }
+.m[data-look="signal"] .m-iconbox .m-icon { font-size: 1em; }
+
+/* ---------- bars: equal ink bars on a thick baseline, Jost values above, mono ticks below; the now
+   bar is red and its tick carries the square. */
+
+.m[data-look="signal"] .m-bars { gap: max(2px, calc(var(--m-u) * 0.8)); }
+.m[data-look="signal"] .m-bars__col { gap: max(2px, calc(var(--m-u) * 0.8)); }
+.m[data-look="signal"] .m-bars__plot { position: relative; }
+.m[data-look="signal"] .m-bars__plot::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: calc(-1 * max(2px, calc(var(--m-u) * 0.8)));
+  bottom: 0;
+  height: var(--m-rule-heavy);
+  background: var(--m-ink);
+}
+.m[data-look="signal"] .m-bars__col:last-child .m-bars__plot::after { right: 0; }
+.m[data-look="signal"] .m-bars__val {
+  font-family: var(--m-font-num);
+  font-weight: var(--m-w-num);
+  font-size: max(10px, calc(var(--m-u) * 3.2));
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.m[data-look="signal"] .m-bars__tick {
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: max(8px, calc(var(--m-u) * 2.2));
+  line-height: 1.2;
+  text-transform: var(--m-label-case);
+  letter-spacing: 0.06em;
+  color: var(--m-ink);
+}
+.m[data-look="signal"] .m-bars__col--now .m-bars__bar { background: var(--m-accent); }
+.m[data-look="signal"] .m-bars__col--now .m-bars__tick::before {
+  content: "";
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-right: 0.5em;
+  background: var(--m-accent);
+  vertical-align: -0.02em;
+}
+/* On a narrow panel every other tick keeps its place but not its label, so none run together. */
+@container m (max-width: 599px) {
+  .m[data-look="signal"] .m-bars__col:nth-child(even) .m-bars__tick { visibility: hidden; }
+}
+
+/* ---------- spark: a firm ink line, the now point a red square */
+
+.m[data-look="signal"] .m-spark { border-bottom: var(--m-rule-heavy) solid var(--m-ink); }
+.m[data-look="signal"] .m-spark__line { stroke-width: max(1.5px, calc(var(--m-u) * 0.5)); stroke-linejoin: miter; stroke-linecap: square; }
+
+/* ---------- meter: a thin ink track, a thick fill, a red square where it stands */
+
+.m[data-look="signal"] .m-meter {
+  flex: none;
+  border: 0;
+  height: max(8px, calc(var(--m-u) * 2.4));
+  background: linear-gradient(var(--m-ink), var(--m-ink)) left center / 100% var(--m-rule) no-repeat;
+  margin-right: calc(max(8px, calc(var(--m-u) * 2.4)) / 2);
+}
+.m[data-look="signal"] .m-meter::before {
+  top: 50%;
+  bottom: auto;
+  height: var(--m-rule-heavy);
+  transform: translateY(-50%);
+}
+.m[data-look="signal"] .m-meter::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(var(--m-value, 0) * 100%);
+  width: max(8px, calc(var(--m-u) * 2.4));
+  height: 100%;
+  transform: translateX(-50%);
+  background: var(--m-accent);
+}
+
+/* ---------- dots: squares; done in ink, to come outlined, today red */
+
+.m[data-look="signal"] .m-dots__dot { border-radius: 0; border-width: max(1px, calc(var(--m-u) * 0.2)); }
+.m[data-look="signal"] .m-dots__dot--now { background: var(--m-accent); border-color: var(--m-accent); }
+
+/* ---------- list: strict rows between rules, a mono zero-padded index, Jost titles */
+
+.m[data-look="signal"] .m-list { border-top: var(--m-rule-heavy) solid var(--m-ink); }
+.m[data-look="signal"] .m-list__item {
+  gap: calc(var(--m-u) * 3);
+  padding: max(3px, calc(var(--m-u) * 1.6)) 0;
+  border-bottom: var(--m-rule) solid var(--m-ink);
+  font-size: max(11px, calc(var(--m-u) * 4.2));
+  line-height: 1.2;
+}
+.m[data-look="signal"] .m-list__n {
+  min-width: 3.4em;
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--sg-label);
+  letter-spacing: var(--m-label-track);
+}
+.m[data-look="signal"] .m-list__t { -webkit-line-clamp: 1; }
+
+/* ---------- quote: big left-aligned Jost, the byline a mono label on a thick rule */
+
+.m[data-look="signal"] .m-quote[data-cap]::before {
+  content: attr(data-cap);
+  flex: none;
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--sg-label);
+  line-height: 1.25;
+  text-transform: var(--m-label-case);
+  letter-spacing: var(--m-label-track);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.m[data-look="signal"] .m-quote__text { margin: 0; text-align: left; line-height: 1.1; letter-spacing: -0.02em; text-wrap: pretty; }
+.m[data-look="signal"] .m-quote__by {
+  flex: none;
+  align-self: flex-start;
+  min-width: min(100%, 40%);
+  border-top: var(--m-rule-heavy) solid var(--m-ink);
+  padding-top: var(--sg-cell);
+  font-size: var(--sg-label);
+}
+
+/* ---------- empty: a mono label */
+
+.m[data-look="signal"] .m-empty {
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: max(10px, calc(var(--m-u) * 3));
+  text-transform: var(--m-label-case);
+  letter-spacing: var(--m-label-track);
+  color: var(--m-ink);
+}
+
+/* ---------- small panels: tighter frame, lighter rules */
+
+@container m (max-height: 359px) {
+  .m[data-look="signal"] .m-page { --m-pad: calc(var(--m-u) * 5); }
+}
+@container m (max-height: 219px) {
+  .m[data-look="signal"] .m-page { --m-pad: calc(var(--m-u) * 5); --m-gap: calc(var(--m-u) * 3); }
+}

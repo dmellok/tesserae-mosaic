@@ -1,2 +1,408 @@
-/* Mosaic look: almanac. Being written. */
-.m[data-look="almanac"] {}
+/*
+ * Mosaic look: almanac. A printed page: a masthead between a heavy rule and a double hairline,
+ * letterspaced small caps at its sides and an italic line in the middle; big Bodoni Moda numerals,
+ * Crimson Pro for words; fine ink hairlines and column rules; wide margins; and one red accent that
+ * marks only the thing that is "now" (today's dot, the current bar or point).
+ *
+ * The bundled faces have no small-caps feature and ship upright only, so small caps are set by hand
+ * (bold capitals, small and letterspaced) and italics are synthesised. Hairlines thicken and Bodoni
+ * turns bold on small panels, where a thin stroke would print as a gap.
+ */
+
+.m[data-look="almanac"] {
+  --m-font-text: "Crimson Pro", "Iowan Old Style", Georgia, serif;
+  --m-font-display: "Bodoni Moda", "Didot", "Crimson Pro", serif;
+  --m-font-num: "Bodoni Moda", "Didot", "Crimson Pro", serif;
+  --m-font-label: "Crimson Pro", Georgia, serif;
+  --m-w-text: 400;
+  --m-w-display: 400;
+  --m-w-num: 400;
+  --m-w-label: 700;
+  --m-label-case: uppercase;
+  --m-label-track: 0.2em;
+  --m-num-track: 0em;
+  --m-rule: max(1px, calc(var(--m-u) * 0.25));
+  --m-rule-heavy: max(2px, calc(var(--m-u) * 0.7));
+  --m-rule-double: max(3px, calc(var(--m-u) * 0.9));
+  --m-radius: 0px;
+  --m-gap: calc(var(--m-u) * 3);
+  --m-pad: max(8px, calc(var(--m-u) * 5));
+  --m-icons: phosphor;
+  --m-icon-weight: light;
+  --m-accent: var(--m-red);
+
+  /* Blocks: a printed page has few. The red one is the accent; the rest are tint and ink. */
+  --m-b1: var(--m-red);
+  --m-b1-on: var(--m-on);
+  --m-b2: var(--m-tint);
+  --m-b2-on: var(--m-ink);
+  --m-b3: var(--m-ink);
+  --m-b3-on: var(--m-paper);
+  --m-bt: var(--m-tint);
+  --m-bt-on: var(--m-ink);
+  --m-bi: var(--m-ink);
+  --m-bi-on: var(--m-paper);
+
+  --m-fs-xs: max(10px, calc(var(--m-u) * 2.8));
+  --m-fs-s: max(11px, calc(var(--m-u) * 3.4));
+  --m-fs-m: max(13px, calc(var(--m-u) * 4.6));
+}
+/* One bit: the tint blocks print as paper, so their text stays ink and they keep a hairline edge. */
+.m[data-look="almanac"][data-bits="1"] {
+  --m-b2-on: var(--m-ink);
+}
+.m[data-look="almanac"][data-bits="1"] .m-block:not([class*="m-block--"]),
+.m[data-look="almanac"][data-bits="1"] .m-block--2 {
+  box-shadow: inset 0 0 0 var(--m-rule) var(--m-ink);
+}
+
+/* Small panels: Bodoni's hairline strokes would vanish, so its numerals go bold. */
+@container m (max-width: 359px) {
+  .m[data-look="almanac"] .m-page { --m-w-num: 700; --m-w-display: 700; }
+}
+@container m (max-height: 359px) {
+  .m[data-look="almanac"] .m-page { --m-w-num: 700; --m-w-display: 700; }
+}
+
+/* ---------- page and text */
+
+.m[data-look="almanac"] .m-page {
+  padding: var(--m-pad) max(10px, calc(var(--m-u) * 6));
+}
+.m[data-look="almanac"] .m-display { letter-spacing: 0.01em; }
+.m[data-look="almanac"] .m-label { font-size: var(--m-fs-xs); }
+
+/* ---------- rules */
+
+.m[data-look="almanac"] .m-rule--double {
+  border-top: 0;
+  border-bottom: var(--m-rule-double) double var(--m-ink);
+  height: 0;
+}
+
+/* ---------- masthead: a heavy rule over, a double hairline under; small caps at the sides, italic in the middle */
+
+.m[data-look="almanac"] .m-masthead {
+  border-top: var(--m-rule-heavy) solid var(--m-ink);
+  border-bottom: var(--m-rule-double) double var(--m-ink);
+  padding: calc(var(--m-u) * 1.4) 0 calc(var(--m-u) * 1.6);
+  gap: calc(var(--m-u) * 3);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.m[data-look="almanac"] .m-masthead > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.m[data-look="almanac"] .m-masthead > :first-child,
+.m[data-look="almanac"] .m-masthead > :nth-child(3):last-child {
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--m-fs-xs);
+  text-transform: var(--m-label-case);
+  letter-spacing: var(--m-label-track);
+  flex: 0 1 auto;
+}
+.m[data-look="almanac"] .m-masthead > :nth-child(3):last-child { text-align: right; }
+.m[data-look="almanac"] .m-masthead > :nth-child(2) {
+  font-style: italic;
+  font-size: var(--m-fs-m);
+  padding: 0 0.2em;
+}
+/* The slanted last letter overhangs its box; the padding holds it, the margin keeps the edge true. */
+.m[data-look="almanac"] .m-masthead > :nth-child(2):last-child { margin-right: -0.2em; }
+/* Two slots: small caps on the left, the italic line on the right. */
+.m[data-look="almanac"] .m-masthead > :nth-child(2):last-child { flex: 0 1 auto; text-align: right; }
+
+/* ---------- the one big thing */
+
+.m[data-look="almanac"] .m-hero > [data-fit] { justify-content: center; }
+/* Bodoni Moda's figures are old-style by default; a clock and a figure want lining ones. */
+.m[data-look="almanac"] .m-clock,
+.m[data-look="almanac"] .m-num,
+.m[data-look="almanac"] .m-stat__value,
+.m[data-look="almanac"] .m-bars__val,
+.m[data-look="almanac"] .m-list__n { font-variant-numeric: tabular-nums lining-nums; }
+/* The am/pm hangs italic off the top of the numerals. Items are centred and a fitted clock's ink is
+   centred in its line, so the lift below (from Crimson's x-height up to Bodoni's figure height) holds
+   in every context. */
+.m[data-look="almanac"] .m-clock { align-items: center; line-height: 1; }
+.m[data-look="almanac"] .m-clock__period {
+  font-family: var(--m-font-text);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 0.24em;
+  letter-spacing: 0;
+  text-transform: lowercase;
+  margin-left: 0.2em;
+  padding-right: 0.15em;
+  position: relative;
+  top: -1.6em;
+}
+/* Portrait: a fitted clock stacks the hour over the minutes, the am/pm hung beside the minutes. */
+@container m (orientation: portrait) {
+  .m[data-look="almanac"] .m-clock[data-fit] .m-clock__time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 0.9;
+  }
+  .m[data-look="almanac"] .m-clock[data-fit] .m-clock__sep { display: none; }
+  .m[data-look="almanac"] .m-clock[data-fit] .m-clock__period { top: 0.15em; }
+}
+
+/* ---------- window: a ruled section, its small-caps caption over a hairline */
+
+.m[data-look="almanac"] .m-window {
+  padding: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: auto;
+  row-gap: calc(var(--m-u) * 2);
+}
+.m[data-look="almanac"] .m-window::before {
+  content: attr(data-cap);
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--m-fs-xs);
+  text-transform: var(--m-label-case);
+  letter-spacing: var(--m-label-track);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  padding-bottom: calc(var(--m-u) * 1);
+  border-bottom: var(--m-rule) solid var(--m-ink);
+}
+.m[data-look="almanac"] .m-window:not([data-cap])::before { padding: 0; }
+
+/* ---------- blocks */
+
+.m[data-look="almanac"] .m-block { padding: calc(var(--m-u) * 3) calc(var(--m-u) * 3.5); }
+
+/* ---------- stats: small caps names over Bodoni figures, columns parted by hairlines */
+
+.m[data-look="almanac"] .m-stat { gap: calc(var(--m-u) * 1); }
+.m[data-look="almanac"] .m-stat__label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; }
+.m[data-look="almanac"] .m-stat__value { font-size: var(--m-fs-xl); line-height: 1; white-space: nowrap; }
+.m[data-look="almanac"] .m-stat__value .m-clock__period {
+  font-family: var(--m-font-text);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 0.45em;
+  letter-spacing: 0;
+  text-transform: lowercase;
+  margin-left: 0.15em;
+}
+.m[data-look="almanac"] .m-stat__sub { font-style: italic; font-size: var(--m-fs-s); }
+/* The hero figure: its name set as an italic line, the figure large. */
+.m[data-look="almanac"] .m-stat--hero .m-stat__label {
+  font-family: var(--m-font-text);
+  font-weight: 400;
+  font-style: italic;
+  font-size: var(--m-fs-m);
+  text-transform: none;
+  letter-spacing: 0;
+  padding-right: 0.2em;
+}
+.m[data-look="almanac"] .m-stat--hero .m-stat__value { font-size: var(--m-fs-xxl); }
+/* A fitted figure sits at the top of its box; a tighter line lets it grow into the room Bodoni's deep
+   descent would otherwise hold. */
+.m[data-look="almanac"] .m-stat__value[data-fit] { line-height: 0.9; }
+
+.m[data-look="almanac"] .m-stats { gap: 0; }
+.m[data-look="almanac"] .m-stats > .m-stat { padding: 0 calc(var(--m-u) * 3); }
+.m[data-look="almanac"] .m-stats > .m-stat:first-child { padding-left: 0; }
+.m[data-look="almanac"] .m-stats > .m-stat + .m-stat { border-left: var(--m-rule) solid var(--m-ink); }
+/* Stats that follow something in a row are parted from it by a column rule too. */
+.m[data-look="almanac"] .m-row > * + .m-stats > .m-stat:first-child {
+  border-left: var(--m-rule) solid var(--m-ink);
+  padding-left: calc(var(--m-u) * 3);
+}
+
+/* Portrait: stats become a table, each name run to its figure on a dotted leader. */
+@container m (orientation: portrait) {
+  .m[data-look="almanac"] .m-stats,
+  .m[data-look="almanac"] .m-stats--wrap {
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: calc(var(--m-u) * 1.6);
+  }
+  .m[data-look="almanac"] .m-stats > .m-stat,
+  .m[data-look="almanac"] .m-stats > .m-stat + .m-stat,
+  .m[data-look="almanac"] .m-row > * + .m-stats > .m-stat:first-child {
+    flex-direction: row;
+    align-items: baseline;
+    gap: calc(var(--m-u) * 1.6);
+    padding: 0;
+    border-left: 0;
+  }
+  .m[data-look="almanac"] .m-stats > .m-stat::after {
+    content: "";
+    order: 1;
+    flex: 1 1 0;
+    min-width: 1em;
+    border-bottom: max(1px, calc(var(--m-u) * 0.4)) dotted var(--m-ink);
+  }
+  .m[data-look="almanac"] .m-stats > .m-stat > .m-stat__label { flex: 0 1 auto; min-width: 0; }
+  .m[data-look="almanac"] .m-stats > .m-stat > .m-stat__value { order: 2; font-size: var(--m-fs-l); }
+  .m[data-look="almanac"] .m-stats > .m-stat > .m-stat__sub { order: 3; }
+}
+
+/* ---------- icon: a plain line glyph, no box */
+
+/* A light line glyph, a little smaller in its square than the core's, so it sits back from the figures. */
+.m[data-look="almanac"] .m-iconbox { color: var(--m-ink); }
+.m[data-look="almanac"] .m-iconbox .m-icon { font-size: max(1em, 58cqmin); }
+
+/* ---------- bars: thin ink rules standing on a baseline, the current one red and wider */
+
+.m[data-look="almanac"] .m-bars { gap: 0; }
+.m[data-look="almanac"] .m-bars__col { gap: calc(var(--m-u) * 0.8); }
+.m[data-look="almanac"] .m-bars__plot {
+  justify-content: center;
+  border-bottom: var(--m-rule) solid var(--m-ink);
+}
+.m[data-look="almanac"] .m-bars__bar { width: max(2px, 22%); }
+.m[data-look="almanac"] .m-bars__col--now .m-bars__bar { width: max(4px, 44%); }
+.m[data-look="almanac"] .m-bars__val {
+  font-family: var(--m-font-num);
+  font-weight: var(--m-w-num);
+  font-size: var(--m-fs-s);
+  white-space: nowrap;
+}
+.m[data-look="almanac"] .m-bars__tick {
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--m-fs-xs);
+  letter-spacing: 0.04em;
+  color: var(--m-ink);
+}
+/* Narrow columns: a tick may wrap ("10 / AM"), so every tick keeps two lines and the bars share a baseline. */
+@container m (max-width: 599px) {
+  .m[data-look="almanac"] .m-bars__tick {
+    white-space: normal;
+    width: min-content;
+    text-align: center;
+    line-height: 1.1;
+    height: 2.2em;
+    overflow: hidden;
+  }
+}
+.m[data-look="almanac"] .m-bars__col--now .m-bars__val,
+.m[data-look="almanac"] .m-bars__col--now .m-bars__tick { color: var(--m-accent); }
+
+/* ---------- spark: an ink hairline, the current point red */
+
+.m[data-look="almanac"] .m-spark__line { stroke-width: max(1px, calc(var(--m-u) * 0.3)); }
+
+/* ---------- meter: a hairline track, the elapsed part a solid ink bar over it */
+
+.m[data-look="almanac"] .m-meter {
+  flex: none;
+  height: max(5px, calc(var(--m-u) * 1.4));
+  border: 0;
+  background: linear-gradient(var(--m-ink), var(--m-ink)) left center / 100% var(--m-rule) no-repeat;
+}
+
+/* ---------- dots: small ink dots for days gone, rings for days to come, today red and larger */
+
+.m[data-look="almanac"] .m-dots__dot,
+.m[data-look="almanac"] .m-dots__dot--done,
+.m[data-look="almanac"] .m-dots__dot--now {
+  border: 0;
+  background: none;
+  display: grid;
+  place-items: center;
+}
+.m[data-look="almanac"] .m-dots__dot::before {
+  content: "";
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: max(1px, calc(var(--m-u) * 0.2)) solid var(--m-ink);
+}
+.m[data-look="almanac"] .m-dots__dot--done::before { background: var(--m-ink); }
+.m[data-look="almanac"] .m-dots__dot--now::before {
+  width: 130%;
+  border: 0;
+  background: var(--m-accent);
+}
+
+/* ---------- list: the lead item in Bodoni, the rest in Crimson, small-caps numbers, hairlines between */
+
+.m[data-look="almanac"] .m-list__item {
+  gap: calc(var(--m-u) * 2.4);
+  padding: calc(var(--m-u) * 1.4) 0;
+  line-height: 1.2;
+}
+.m[data-look="almanac"] .m-list__item:last-child { border-bottom: 0; }
+.m[data-look="almanac"] .m-list__n {
+  min-width: 2.2em;
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--m-fs-xs);
+  letter-spacing: var(--m-label-track);
+}
+.m[data-look="almanac"] .m-list__item:first-child {
+  padding-top: calc(var(--m-u) * 0.6);
+  padding-bottom: calc(var(--m-u) * 2);
+  border-bottom: var(--m-rule-double) double var(--m-ink);
+}
+.m[data-look="almanac"] .m-list__item:first-child .m-list__t {
+  font-family: var(--m-font-display);
+  font-weight: var(--m-w-display);
+  font-size: var(--m-fs-l);
+  line-height: 1.1;
+}
+.m[data-look="almanac"] .m-list__item:first-child .m-list__n { color: var(--m-accent); }
+
+/* ---------- quote: centred italic, the name in small caps after a dash */
+
+.m[data-look="almanac"] .m-quote { text-align: center; }
+.m[data-look="almanac"] .m-quote[data-cap]::before {
+  content: attr(data-cap);
+  flex: none;
+  font-family: var(--m-font-label);
+  font-weight: var(--m-w-label);
+  font-size: var(--m-fs-xs);
+  text-transform: var(--m-label-case);
+  letter-spacing: var(--m-label-track);
+  line-height: 1.2;
+  padding: calc(var(--m-u) * 1.4) 0 calc(var(--m-u) * 1.6);
+  border-top: var(--m-rule-heavy) solid var(--m-ink);
+  border-bottom: var(--m-rule-double) double var(--m-ink);
+}
+.m[data-look="almanac"] .m-quote__text {
+  margin: 0;
+  font-family: var(--m-font-text);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.2;
+  padding: 0 0.12em;
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+}
+.m[data-look="almanac"] .m-quote__by {
+  flex: none;
+  font-size: var(--m-fs-s);
+}
+.m[data-look="almanac"] .m-quote__by::before { content: "\2014\2002"; letter-spacing: 0; }
+
+/* ---------- empty */
+
+.m[data-look="almanac"] .m-empty {
+  font-style: italic;
+  font-size: var(--m-fs-m);
+  color: var(--m-ink-2);
+}
+
+/* ---------- tiny panels (short edge under 220 px): tighter rules, stats read on one line */
+
+@container m (max-height: 219px) {
+  .m[data-look="almanac"] .m-page { gap: calc(var(--m-u) * 2.4); }
+  .m[data-look="almanac"] .m-masthead,
+  .m[data-look="almanac"] .m-quote[data-cap]::before { padding: 1px 0 2px; }
+  .m[data-look="almanac"] .m-stats > .m-stat { flex-direction: row; align-items: baseline; gap: 0.5em; }
+  .m[data-look="almanac"] .m-stats > .m-stat > .m-stat__value { font-size: var(--m-fs-l); }
+  .m[data-look="almanac"] .m-list__item { padding: 1px 0 2px; }
+  .m[data-look="almanac"] .m-list__item:first-child { padding: 0 0 3px; }
+}
