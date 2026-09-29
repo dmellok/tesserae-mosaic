@@ -46,6 +46,9 @@ const INSPECT = `(() => {
     if (el.classList.contains("err")) continue;
     const r = el.getBoundingClientRect(); if (!r.width && !r.height) continue;
     const cs = getComputedStyle(el); if (cs.visibility === "hidden" || cs.display === "none") continue;
+    // Inside one-line fitted text the line boxes overhang on purpose; Mosaic.fit centres the ink in
+    // the fitted box, which is what is checked (as the element itself).
+    if (el.parentElement && el.parentElement.closest('[data-fit]:not([data-fit="wrap"])') && !el.matches(".m-clock__period")) continue;
     if (r.right > R.right + 1 || r.bottom > R.bottom + 1 || r.left < R.left - 1 || r.top < R.top - 1) out.push("off the panel: " + name(el));
     // One-line fitted text is sized by its ink and nudged to centre it, so its line box may overhang
     // the box while the glyphs do not; only its width is checked.

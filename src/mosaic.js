@@ -33,8 +33,10 @@
     const h = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
     if (w <= 0 || h <= 0) return 0;
     const min = o.min != null ? o.min : 10;
-    const wrap = el.dataset.fit === "wrap" || o.wrap;
-    return wrap ? fitLines(el, w, h, min, o.max) : fitInk(el, w, h, min, o.max);
+    // A look may stack a fitted element's parts (hour over minutes); that is lines, not one line.
+    const stacked = [...el.querySelectorAll("*")].some((c) => getComputedStyle(c).display === "block");
+    if (el.dataset.fit === "wrap" || o.wrap || stacked) { el.style.lineHeight = ""; el.style.removeProperty("--m-fit-shift"); return fitLines(el, w, h, min, o.max); }
+    return fitInk(el, w, h, min, o.max);
   };
 
   /**

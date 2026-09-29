@@ -149,7 +149,7 @@
 .m[data-look="pixel"] .m-clock { line-height: 1; }
 /* The am/pm sits on the numerals' baseline, raised so its top is level with theirs: VT323's
    numerals stand 0.56em, Silkscreen's capitals 0.62em. It keeps the fit's centring shift. */
-.m[data-look="pixel"] .m-clock__period { font-size: max(8px, 0.2em); font-weight: 700; margin-left: 0.3em; letter-spacing: 0.04em; top: calc(var(--m-fit-shift, 0px) - 2.2em); }
+.m[data-look="pixel"] .m-clock__period { font-size: max(8px, 0.2em); font-weight: 700; margin-left: 0.3em; letter-spacing: 0.04em; top: calc(var(--m-fit-shift, 0px) - 1.25em); }
 .m[data-look="pixel"] .m-clock__period, .m[data-look="pixel"] .m-stat__value .m-clock__period { position: relative; }
 
 /* ---------- icons: pixel bitmaps drawn at a whole number of device pixels a cell */

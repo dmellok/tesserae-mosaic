@@ -116,34 +116,7 @@
 
 /* ---------- the big things */
 
-/* Jost's line box is about 1.45 em deep, twice the height of its numerals, and fitting measures
-   that box, so fitted numerals would come out small. Two ways round it, both inside the box:
-   - the clock's numerals sit in a box of their own with paint containment, which keeps the deep
-     line box out of the measure, so the clock grows until its width stops it;
-   - other one-line fitted text stacks from the bottom (column-reverse), where overflow below does
-     not count, on a line box as tall as its capitals, with room kept under the baseline for
-     descenders; it reaches a fifth of an em past its box at top and bottom, into space the
-     numerals never paint, bounded by the page's padding so it never leaves the panel. */
-.m[data-look="signal"] [data-fit]:not([data-fit="wrap"]):not(.m-clock) {
-  --sg-trim: min(0.2em, var(--m-pad));
-  display: flex;
-  flex-direction: column-reverse;
-  justify-content: flex-start;
-  align-items: flex-start;
-  line-height: 0.76;
-  padding: 0 0.06em 0.2em 0;
-  margin-block: calc(-1 * var(--sg-trim));
-}
-.m[data-look="signal"] .m-hero > [data-fit]:not([data-fit="wrap"]):not(.m-clock) { height: calc(100% + 2 * var(--sg-trim)); }
-.m[data-look="signal"] .m-clock { letter-spacing: -0.045em; line-height: 0.8; }
-/* In the hero the clock is one line of text, so am/pm sits on the numerals' baseline, and the line is
-   centred in the hero as a whole. */
-.m[data-look="signal"] .m-hero > .m-clock { display: block; align-content: center; }
-.m[data-look="signal"] .m-clock__time { display: inline-block; contain: paint; overflow-clip-margin: 0.03em; }
-/* Its parts are boxes as tall as the numerals too, not Jost's deep line box. */
-.m[data-look="signal"] .m-clock__h,
-.m[data-look="signal"] .m-clock__sep,
-.m[data-look="signal"] .m-clock__m { display: inline-block; }
+.m[data-look="signal"] .m-clock { letter-spacing: -0.045em; }
 /* Portrait stacks the hour over the minutes, so the numerals can be about twice the size. */
 @container m (orientation: portrait) {
   .m[data-look="signal"] .m-hero > .m-clock .m-clock__h,
