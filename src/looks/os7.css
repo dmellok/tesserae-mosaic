@@ -3,8 +3,9 @@
  *
  * One-bit by nature: ink and paper, the 50% desktop pattern, windows with pinstriped title bars,
  * a close box and a hard square shadow, a menu bar across the top, dialogs with a double border
- * and a default button. Chicago and Geneva are not bundled, so Pixelify Sans (bold for titles,
- * menus and big numerals) and DotGothic16 (text) stand in. The only colour is a single accent mark
+ * and a default button. Chicago and Geneva are not bundled: Outfit bold stands in for Chicago's
+ * big type (clock, numerals, quotes), which reads far better large than a pixel face; Pixelify Sans
+ * bold keeps the bitmap feel in titles and menus, and DotGothic16 sets the small text. The only colour is a single accent mark
  * for "now", which prints as ink on a one-bit panel like everything else.
  *
  * --o7-px is one screen pixel of the old Mac, scaled to the panel: the short edge over 240,
@@ -21,8 +22,8 @@
   --o7-bar: max(14px, calc(var(--m-u) * 5.2));
 
   --m-font-text: "DotGothic16", "Pixelify Sans", monospace;
-  --m-font-display: "Pixelify Sans", "DotGothic16", monospace;
-  --m-font-num: "Pixelify Sans", monospace;
+  --m-font-display: "Outfit", "Pixelify Sans", sans-serif;
+  --m-font-num: "Outfit", "Pixelify Sans", sans-serif;
   --m-font-label: "Pixelify Sans", monospace;
   --m-w-text: 400;
   --m-w-display: 700;
